@@ -1,0 +1,1172 @@
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  :root {
+    --side-bg: #EAF3F7;
+    --side-border: #C5DDE8;
+    --accent: #2A7FA8;
+    --accent-light: #E1F1F8;
+    --accent-hover: #1C6080;
+    --text-main: #1E3544;
+    --text-muted: #5A7A8A;
+    --card-bg: #FFFFFF;
+    --page-bg: #F4F8FA;
+    --border: #D0E4ED;
+    --success: #2E8C6A;
+    --success-bg: #E6F4EF;
+    --warn: #B06D10;
+    --warn-bg: #FEF4E6;
+    --info-bg: #E6F1FB;
+    --info: #185FA5;
+    --danger: #A32D2D;
+    --danger-bg: #FCEBEB;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  .app {
+    display: flex;
+    height: 100vh;
+    min-height: 640px;
+    background: var(--page-bg);
+    font-size: 13px;
+  }
+
+  .sidebar {
+    width: 210px;
+    min-width: 210px;
+    background: var(--side-bg);
+    border-right: 1px solid var(--side-border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .sidebar-logo {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--side-border);
+  }
+
+  .sidebar-logo .brand {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--accent);
+    letter-spacing: 0.3px;
+  }
+
+  .sidebar-logo .sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 12px 10px 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    margin: 2px 6px;
+    color: var(--text-main);
+    transition: background 0.15s;
+  }
+
+  .nav-item:hover {
+    background: #D3EBF4;
+  }
+
+  .nav-item.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  .nav-item.active .nav-icon {
+    color: white;
+  }
+
+  .nav-icon {
+    font-size: 16px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-icon {
+    color: white;
+  }
+
+  .nav-label {
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-weight: bold;
+  }
+
+  .nav-item.active .nav-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px 14px;
+    border-top: 1px solid var(--side-border);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    height: 52px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    gap: 12px;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text-main);
+    flex: 1;
+  }
+
+  .topbar-badge {
+    font-size: 11px;
+    background: var(--success-bg);
+    color: var(--success);
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-weight: bold;
+  }
+
+  .topbar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  .section {
+    display: none;
+  }
+
+  .section.active {
+    display: block;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-val {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--text-main);
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .stat-pill {
+    display: inline-block;
+    font-size: 10px;
+    border-radius: 8px;
+    padding: 2px 7px;
+    margin-top: 5px;
+    font-weight: bold;
+  }
+
+  .pill-green {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+
+  .pill-warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+
+  .pill-blue {
+    background: var(--info-bg);
+    color: var(--info);
+  }
+
+  .pill-red {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title i {
+    color: var(--accent);
+    font-size: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  td {
+    padding: 8px 10px;
+    font-size: 12.5px;
+    color: var(--text-main);
+    border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #F0F7FA;
+  }
+
+  .status {
+    display: inline-block;
+    font-size: 10.5px;
+    border-radius: 8px;
+    padding: 2px 9px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .s-open {
+    background: var(--info-bg);
+    color: var(--info);
+  }
+
+  .s-active {
+    background: #E6F4F0;
+    color: #1C6B52;
+  }
+
+  .s-liq {
+    background: #EEF0FD;
+    color: #4B44B0;
+  }
+
+  .s-closed {
+    background: var(--side-bg);
+    color: var(--text-muted);
+  }
+
+  .s-warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .page-header h2 {
+    font-size: 17px;
+    color: var(--text-main);
+    font-weight: bold;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 7px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: Arial;
+    font-weight: bold;
+    transition: background 0.15s;
+  }
+
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn-ghost {
+    background: var(--card-bg);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .btn-ghost:hover {
+    background: var(--accent-light);
+  }
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 11.5px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .form-group input,
+  .form-group select {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-size: 12.5px;
+    color: var(--text-main);
+    background: var(--card-bg);
+    font-family: Arial;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+  }
+
+  .toggle {
+    width: 36px;
+    height: 18px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on {
+    background: var(--accent);
+  }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.2s;
+  }
+
+  .toggle.on::after {
+    left: 20px;
+  }
+
+  .toggle-label {
+    font-size: 12.5px;
+    color: var(--text-main);
+  }
+
+  .breadcrumb {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .breadcrumb span {
+    color: var(--accent);
+  }
+
+  .info-box {
+    background: var(--info-bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--info);
+  }
+
+  .step-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  .step {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    font-size: 11.5px;
+    background: var(--side-bg);
+    border: 0.5px solid var(--side-border);
+    color: var(--text-muted);
+    position: relative;
+  }
+
+  .step:first-child {
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  .step:last-child {
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  .step.done {
+    background: var(--success-bg);
+    color: var(--success);
+    font-weight: bold;
+  }
+
+  .step.current {
+    background: var(--accent);
+    color: white;
+    font-weight: bold;
+  }
+
+  .step-num {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .progress-wrap {
+    margin: 8px 0;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--side-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+  }
+
+  .audit-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .audit-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .audit-text {
+    font-size: 12px;
+    color: var(--text-main);
+    line-height: 1.4;
+  }
+
+  .audit-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    border-radius: 6px;
+    padding: 2px 8px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: bold;
+    margin-right: 4px;
+  }
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Sistema de
+  Liquidación de Comisiones Permoda Ltda — aplicación mockup con 5 módulos navegables</h2>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">PERMODA Ltda.</div>
+      <div class="sub">Sistema de Comisiones</div>
+    </div>
+    <div class="nav-section">Módulos</div>
+    <div class="nav-item active" onclick="nav(this,'dashboard')">
+      <i class="ti ti-layout-dashboard nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Resumen general</span>
+    </div>
+    <div class="nav-item" onclick="nav(this,'hu01')">
+      <i class="ti ti-calendar nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Calendarios y períodos</span>
+    </div>
+    <div class="nav-item" onclick="nav(this,'hu02')">
+      <i class="ti ti-settings nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Parametrización</span>
+      
+    </div>
+    <div class="nav-item" onclick="nav(this,'hu03')">
+      <i class="ti ti-calculator nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Liquidación automática</span>
+    </div>
+    <div class="nav-item" onclick="nav(this,'hu04')">
+      <i class="ti ti-file-analytics nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Trazabilidad y salida</span>
+    </div>
+    <div class="nav-section" style="margin-top:8px;">Sistema</div>
+    <div class="nav-item" onclick="sendPrompt('¿Qué roles y permisos necesita el sistema de comisiones Permoda?')">
+      <i class="ti ti-users nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Usuarios y roles ↗</span>
+    </div>
+    <div class="nav-item" onclick="sendPrompt('¿Cómo se configura la auditoría y los logs del sistema?')">
+      <i class="ti ti-shield-check nav-icon" aria-hidden="true"></i>
+      <span class="nav-label">Auditoría ↗</span>
+    </div>
+    <div class="sidebar-footer">v0.01<br>Permoda Ltda. © 2026</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Resumen general</div>
+      <div class="topbar-badge"><i class="ti ti-circle-check" aria-hidden="true"></i> Período activo: Jun 2025</div>
+      <div style="width:1px;height:24px;background:var(--border);margin:0 6px;"></div>
+      <div class="topbar-avatar" aria-label="Usuario: Administrador">AD</div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="s-dashboard">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-calendar-event" aria-hidden="true"></i> Períodos activos</div>
+            <div class="stat-val">3</div>
+            <div class="stat-sub">Comisiones · Cumplimiento · Bonos</div>
+            <div class="stat-pill pill-blue">Abierto</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-users" aria-hidden="true"></i> Colaboradores</div>
+            <div class="stat-val">148</div>
+            <div class="stat-sub">22 tiendas activas</div>
+            <div class="stat-pill pill-green">↑ +4 este mes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-calculator" aria-hidden="true"></i> Liquidaciones Jun</div>
+            <div class="stat-val">12</div>
+            <div class="stat-sub">De 22 pendientes</div>
+            <div class="stat-pill pill-warn">En curso</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-coin" aria-hidden="true"></i> Comisiones brutas</div>
+            <div class="stat-val">$48.2M</div>
+            <div class="stat-sub">Sin IVA: $40.5M</div>
+            <div class="stat-pill pill-green">+8.3% vs May</div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-list-check" aria-hidden="true"></i> Estado de períodos — Jun 2025
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Calendario</th>
+                  <th>Período</th>
+                  <th>Fechas</th>
+                  <th>Estado</th>
+                 
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Comisiones</strong></td>
+                  <td>Junio 2025</td>
+                  <td style="color:var(--text-muted)">01/06 – 30/06</td>
+                  <td><span class="status s-active">En curso</span></td>
+
+                </tr>
+                <tr>
+                  <td><strong>Cumplimiento</strong></td>
+                  <td>Junio 2025</td>
+                  <td style="color:var(--text-muted)">01/06 – 30/06</td>
+                  <td><span class="status s-open">Abierto</span></td>
+
+                </tr>
+                <tr>
+                  <td><strong>Bonos</strong></td>
+                  <td>Mayo 2025</td>
+                  <td style="color:var(--text-muted)">01/05 – 31/05</td>
+                  <td><span class="status s-liq">Liquidado</span></td>
+
+                </tr>
+                <tr>
+                  <td><strong>Comisiones</strong></td>
+                  <td>Mayo 2025</td>
+                  <td style="color:var(--text-muted)">01/05 – 31/05</td>
+                  <td><span class="status s-closed">Cerrado</span></td>
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><i class="ti ti-activity" aria-hidden="true"></i> Actividad reciente</div>
+            <div class="audit-row">
+              <div class="audit-dot" style="background:var(--success)"></div>
+              <div>
+                <div class="audit-text">Liquidación completada — Tienda #07 Chapinero</div>
+                <div class="audit-meta">Hoy 09:14 · admin@permoda.co</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div class="audit-dot" style="background:var(--warn)"></div>
+              <div>
+                <div class="audit-text">Traslado de colaborador detectado — subperíodo fragmentado</div>
+                <div class="audit-meta">Ayer 17:42 · motor_etl</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div class="audit-dot"></div>
+              <div>
+                <div class="audit-text">Exportación nómina generada — Período May 2025</div>
+                <div class="audit-meta">20 Jun · rrhh@permoda.co</div>
+              </div>
+            </div>
+            <div class="audit-row">
+              <div class="audit-dot"></div>
+              <div>
+                <div class="audit-text">Parámetros actualizados — Cargo Vendedor Plus</div>
+                <div class="audit-meta">19 Jun · admin@permoda.co</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HU01 -->
+      <div class="section" id="s-hu01">
+        <div class="breadcrumb">Inicio / <span>Calendarios y períodos</span></div>
+        <div class="page-header">
+          <h2>Gestión de calendarios y períodos</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm"
+              onclick="sendPrompt('Explícame las reglas de no solapamiento de fechas entre períodos del sistema Permoda')"><i
+                class="ti ti-help-circle"></i> Ayuda ↗</button>
+            <button class="btn btn-sm"><i class="ti ti-plus"></i> Nuevo calendario</button>
+          </div>
+        </div>
+        <div class="info-box"><i class="ti ti-info-circle" aria-hidden="true"></i> Los estados de período
+          (<strong>Abierto, En curso, Liquidado, Cerrado</strong>) son controlados exclusivamente por el motor de
+          liquidación. No se permiten cambios manuales.</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i> Crear nuevo período anual</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Calendario</label>
+              <select>
+                <option>Comisiones 2025</option>
+                <option>Cumplimiento 2025</option>
+                <option>Bonos 2025</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de período</label>
+              <select>
+                <option>Mensual</option>
+                <option>Quincenal</option>
+                <option>Bimestral</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Fecha inicio</label><input type="date" value="2025-07-01" /></div>
+            <div class="form-group"><label>Fecha fin</label><input type="date" value="2025-07-31" /></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+            <button class="btn btn-ghost btn-sm">Cancelar</button>
+            <button class="btn btn-sm"><i class="ti ti-calendar-plus"></i> Crear período</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-table" aria-hidden="true"></i> Períodos registrados</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Calendario</th>
+                <th>Período</th>
+                <th>Fecha inicio</th>
+                <th>Fecha fin</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <tag class="tag">Comisiones</tag>
+                </td>
+                <td>Jul 2025</td>
+                <td>01/07/2025</td>
+                <td>31/07/2025</td>
+                <td><span class="status s-open">Abierto</span></td>
+                <td><button class="btn btn-ghost btn-sm"><i class="ti ti-edit"></i></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <tag class="tag">Comisiones</tag>
+                </td>
+                <td>Jun 2025</td>
+                <td>01/06/2025</td>
+                <td>30/06/2025</td>
+                <td><span class="status s-active">En curso</span></td>
+                <td><button class="btn btn-ghost btn-sm" style="opacity:0.4" disabled><i
+                      class="ti ti-lock"></i></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <tag class="tag">Cumplimiento</tag>
+                </td>
+                <td>Jun 2025</td>
+                <td>01/06/2025</td>
+                <td>30/06/2025</td>
+                <td><span class="status s-open">Abierto</span></td>
+                <td><button class="btn btn-ghost btn-sm"><i class="ti ti-edit"></i></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <tag class="tag">Comisiones</tag>
+                </td>
+                <td>May 2025</td>
+                <td>01/05/2025</td>
+                <td>31/05/2025</td>
+                <td><span class="status s-closed">Cerrado</span></td>
+                <td><button class="btn btn-ghost btn-sm" style="opacity:0.4" disabled><i
+                      class="ti ti-lock"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HU02 -->
+      <div class="section" id="s-hu02">
+        <div class="breadcrumb">Inicio / <span>Parametrización de cargos</span></div>
+        <div class="page-header">
+          <h2>Parametrización de cargos y comisiones</h2>
+          <button class="btn btn-sm"><i class="ti ti-plus"></i> Nuevo esquema</button>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title"><i class="ti ti-briefcase" aria-hidden="true"></i> Configurar cargo — fuente Midasoft
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Código oficio (Midasoft)</label>
+              <input type="text" placeholder="Ej. VND-001" value="VND-002" />
+            </div>
+            <div class="form-group">
+              <label>Cargo</label>
+              <select>
+                <option>Vendedor</option>
+                <option>Vendedor Plus</option>
+                <option>Jefe de Tienda</option>
+                <option>Gerente Regional</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo de liquidación</label>
+              <select>
+                <option>Individual</option>
+                <option>Global por tienda</option>
+                <option>Global por grupo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Distribución</label>
+              <select>
+                <option>Individual</option>
+                <option>Proporcional</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Vigencia desde</label><input type="date" value="2025-06-01" /></div>
+            <div class="form-group"><label>Vigencia hasta</label><input type="date" value="2025-12-31" /></div>
+          </div>
+          <div
+            style="background:var(--warn-bg);border:1px solid #F0C070;border-radius:var(--radius);padding:12px 14px;margin:8px 0">
+            <div style="font-size:12px;font-weight:bold;color:var(--warn);margin-bottom:8px">Afectación del cálculo —
+              solo una opción activa</div>
+            <div class="toggle-row">
+              <div class="toggle on" role="switch" aria-checked="true" tabindex="0"
+                onclick="this.classList.toggle('on')"></div>
+              <span class="toggle-label">Horas laboradas</span>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle" role="switch" aria-checked="false" tabindex="0" onclick="this.classList.toggle('on')">
+              </div>
+              <span class="toggle-label">Novedades diarias</span>
+            </div>
+            <div style="font-size:11px;color:var(--warn);margin-top:6px"><i class="ti ti-alert-triangle"
+                aria-hidden="true"></i> Exactamente una debe estar activa. Ambas en TRUE o FALSE no están permitidas.
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label>Motivo de cambio (obligatorio)</label>
+            <input type="text" placeholder="Ej. Actualización de tabla salarial junio 2025" />
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+            <button class="btn btn-ghost btn-sm">Cancelar</button>
+            <button class="btn btn-sm"><i class="ti ti-device-floppy"></i> Guardar esquema</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HU03 -->
+      <div class="section" id="s-hu03">
+        <div class="breadcrumb">Inicio / <span>Liquidación automática</span></div>
+        <div class="page-header">
+          <h2>Motor de liquidación — Jun 2025</h2>
+          <button class="btn btn-sm"
+            onclick="sendPrompt('¿Qué validaciones previas requiere el motor ETL antes de iniciar la liquidación?')"><i
+              class="ti ti-player-play"></i> Iniciar proceso ↗</button>
+        </div>
+        <div class="step-bar" role="list" aria-label="Pasos del proceso de liquidación">
+          <div class="step done" role="listitem"><span class="step-num">✓</span>Validar elegibilidad</div>
+          <div class="step done" role="listitem"><span class="step-num">✓</span>Consumo ICG</div>
+          <div class="step current" role="listitem"><span class="step-num">3</span>Normalizar IVA</div>
+          <div class="step" role="listitem"><span class="step-num">4</span>Com. bancarias</div>
+          <div class="step" role="listitem"><span class="step-num">5</span>Fragmentar sub.</div>
+          <div class="step" role="listitem"><span class="step-num">6</span>Consolidar</div>
+        </div>
+        <div class="row2">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-database" aria-hidden="true"></i> Fuentes de consumo automático
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Fuente</th>
+                  <th>Tipo de dato</th>
+                  <th>Estado</th>
+                  <th>Registros</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>ICG</strong></td>
+                  <td>Ventas por CC</td>
+                  <td><span class="status s-active">OK</span></td>
+                  <td>14,823</td>
+                </tr>
+                <tr>
+                  <td><strong>ICG</strong></td>
+                  <td>Com. bancarias</td>
+                  <td><span class="status s-active">OK</span></td>
+                  <td>212</td>
+                </tr>
+                <tr>
+                  <td><strong>Midasoft</strong></td>
+                  <td>Base empleados</td>
+                  <td><span class="status s-active">OK</span></td>
+                  <td>148</td>
+                </tr>
+                <tr>
+                  <td><strong>Midasoft</strong></td>
+                  <td>Marcaciones</td>
+                  <td><span class="status s-warn">Procesando</span></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Midasoft</strong></td>
+                  <td>Novedades</td>
+                  <td><span class="status s-open">Pendiente</span></td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-receipt" aria-hidden="true"></i> Control de normalización</div>
+            <div style="margin-bottom:12px">
+              <div class="progress-label"><span>Factor IVA aplicado (÷1.19)</span><span
+                  style="font-weight:bold;color:var(--success)">8,412 / 14,823</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:57%"></div>
+              </div>
+            </div>
+            <div style="background:var(--side-bg);border-radius:var(--radius);padding:10px 12px;font-size:12px">
+              <div
+                style="margin-bottom:6px;color:var(--text-muted);font-weight:bold;text-transform:uppercase;font-size:10.5px">
+                Regla de comisiones bancarias</div>
+              <div style="color:var(--text-main)">Descuento aplicado al tipo de venta con <strong>mayor acumulado sin
+                  IVA</strong></div>
+              <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="status s-active">Línea: $18.2M ←</span>
+                <span class="status s-closed">Lín. Estrategia: $14.1M</span>
+                <span class="status s-closed">Promoción: $8.2M</span>
+              </div>
+            </div>
+            <div style="margin-top:10px;font-size:11.5px;color:var(--text-muted)"><i class="ti ti-shield"
+                aria-hidden="true"></i> Rollback habilitado — transacción activa</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HU04 -->
+      <div class="section" id="s-hu04">
+        <div class="breadcrumb">Inicio / <span>Trazabilidad y salida</span></div>
+        <div class="page-header">
+          <h2>Consulta y exportación — solo lectura</h2>
+          <button class="btn btn-sm"><i class="ti ti-download"></i> Exportar nómina</button>
+        </div>
+        <div class="info-box"><i class="ti ti-eye" aria-hidden="true"></i> Módulo informativo. Solo muestra períodos en
+          estado <strong>Liquidado</strong> o <strong>Cerrado</strong>. No permite modificaciones ni reaperturas.</div>
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group">
+            <label>Calendario</label>
+            <select>
+              <option>Comisiones 2025</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Período</label>
+            <select>
+              <option>Mayo 2025 — Cerrado</option>
+              <option>Abril 2025 — Cerrado</option>
+            </select>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title"><i class="ti ti-building-store" aria-hidden="true"></i> Desglose por tienda — Mayo
+            2025 (drill-down)</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Tienda</th>
+                <th>Vta bruta</th>
+                <th>Sin IVA</th>
+                <th>Base neta</th>
+                <th>Com. bancaria</th>
+                <th>Comisión final</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Chapinero #07</strong></td>
+                <td>$4.2M</td>
+                <td>$3.53M</td>
+                <td>$3.41M</td>
+                <td style="color:var(--danger)">-$48,200</td>
+                <td style="color:var(--success);font-weight:bold">$3.36M</td>
+                <td><button class="btn btn-ghost btn-sm"
+                    onclick="sendPrompt('Muéstrame el desglose por colaborador de la tienda Chapinero #07 en Mayo 2025')"><i
+                      class="ti ti-zoom-in"></i> ↗</button></td>
+              </tr>
+              <tr>
+                <td><strong>Usaquén #12</strong></td>
+                <td>$3.8M</td>
+                <td>$3.19M</td>
+                <td>$3.08M</td>
+                <td style="color:var(--danger)">-$31,500</td>
+                <td style="color:var(--success);font-weight:bold">$3.05M</td>
+                <td><button class="btn btn-ghost btn-sm"
+                    onclick="sendPrompt('Muéstrame el desglose por colaborador de la tienda Usaquén #12 en Mayo 2025')"><i
+                      class="ti ti-zoom-in"></i> ↗</button></td>
+              </tr>
+              <tr>
+                <td><strong>Centro #03</strong></td>
+                <td>$5.1M</td>
+                <td>$4.29M</td>
+                <td>$4.15M</td>
+                <td style="color:var(--danger)">-$57,800</td>
+                <td style="color:var(--success);font-weight:bold">$4.09M</td>
+                <td><button class="btn btn-ghost btn-sm"
+                    onclick="sendPrompt('Muéstrame el desglose por colaborador de la tienda Centro #03 en Mayo 2025')"><i
+                      class="ti ti-zoom-in"></i> ↗</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-clock-history" aria-hidden="true"></i> Log de auditoría de consultas
+          </div>
+          <div class="audit-row">
+            <div class="audit-dot" style="background:var(--info)"></div>
+            <div>
+              <div class="audit-text">Consulta general — Período Mayo 2025, filtro: todas las tiendas</div>
+              <div class="audit-meta">Hoy 10:22 · rrhh@permoda.co · IP 192.168.1.45</div>
+            </div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-dot" style="background:var(--info)"></div>
+            <div>
+              <div class="audit-text">Exportación archivo plano nómina — 148 registros generados</div>
+              <div class="audit-meta">Ayer 16:08 · admin@permoda.co · IP 192.168.1.10</div>
+            </div>
+          </div>
+          <div class="audit-row">
+            <div class="audit-dot" style="background:var(--info)"></div>
+            <div>
+              <div class="audit-text">Drill-down colaborador: ID 4721 — Chapinero #07</div>
+              <div class="audit-meta">Ayer 15:50 · rrhh@permoda.co · IP 192.168.1.45</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const titles = {
+    dashboard: 'Resumen general',
+    hu01: 'HU01 — Calendarios y períodos',
+    hu02: 'HU02 — Parametrización de cargos',
+    hu03: 'HU03 — Liquidación automática',
+    hu04: 'HU04 — Trazabilidad y salida'
+  };
+  function nav(el, id) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('s-' + id).classList.add('active');
+    document.getElementById('topbar-title').textContent = titles[id] || '';
+  }
+</script>
