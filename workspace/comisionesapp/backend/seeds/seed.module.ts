@@ -1,14 +1,19 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Calendario } from '../src/modules/calendarios/entities/calendario.entity';
+import { Periodo } from '../src/modules/calendarios/entities/periodo.entity';
+import { GrupoTiendas } from '../src/modules/catalogos/entities/grupo-tiendas.entity';
+import { Tienda } from '../src/modules/catalogos/entities/tienda.entity';
+import { Colaborador } from '../src/modules/catalogos/entities/colaborador.entity';
+import { VentaICG } from '../src/modules/catalogos/entities/venta-icg.entity';
+import { SeedService } from './seed.service';
 
-/**
- * Target canónico: SQL Server 2022 (DB_TYPE=mssql, puerto 1433).
- * Para pruebas locales con MySQL Workbench: DB_TYPE=mysql, puerto 3306.
- * synchronize=true solo en desarrollo — NUNCA en producción.
- */
+const ENTITIES = [Calendario, Periodo, GrupoTiendas, Tienda, Colaborador, VentaICG];
+
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -24,9 +29,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             username: cfg.get<string>('DB_USERNAME'),
             password: cfg.get<string>('DB_PASSWORD'),
             database: cfg.get<string>('DB_DATABASE'),
-            entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+            entities: ENTITIES,
             synchronize: !isProd,
-            logging: !isProd,
+            logging: false,
           };
         }
 
@@ -37,14 +42,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           username: cfg.get<string>('DB_USERNAME'),
           password: cfg.get<string>('DB_PASSWORD'),
           database: cfg.get<string>('DB_DATABASE'),
-          entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+          entities: ENTITIES,
           synchronize: !isProd,
-          logging: !isProd,
+          logging: false,
           options: { encrypt: false, trustServerCertificate: true },
         };
       },
     }),
+    TypeOrmModule.forFeature(ENTITIES),
   ],
-  exports: [TypeOrmModule],
+  providers: [SeedService],
 })
-export class DatabaseModule {}
+export class SeedModule {}

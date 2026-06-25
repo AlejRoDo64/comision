@@ -8,6 +8,8 @@ import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { ProductosModule } from './productos/productos.module';
 import { UsersModule } from './users/users.module';
+import { CalendariosModule } from './modules/calendarios/calendarios.module';
+import { CatalogosModule } from './modules/catalogos/catalogos.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     ProductosModule,
+    CalendariosModule,
+    CatalogosModule,
   ],
   controllers: [AppController],
   providers: [

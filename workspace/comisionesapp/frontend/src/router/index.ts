@@ -11,23 +11,36 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/HomeView.vue'),
+      name: 'dashboard',
+      component: () => import('@/views/DashboardView.vue'),
     },
     {
-      path: '/productos',
-      name: 'productos',
-      component: () => import('@/views/ProductosView.vue'),
+      path: '/calendarios',
+      name: 'calendarios',
+      component: () => import('@/views/CalendariosView.vue'),
+    },
+    {
+      path: '/parametrizacion',
+      name: 'parametrizacion',
+      component: () => import('@/views/ParametrizacionView.vue'),
+    },
+    {
+      path: '/liquidacion',
+      name: 'liquidacion',
+      component: () => import('@/views/LiquidacionView.vue'),
+    },
+    {
+      path: '/trazabilidad',
+      name: 'trazabilidad',
+      component: () => import('@/views/TrazabilidadView.vue'),
     },
   ],
 });
 
-// Guard global: redirige a /login si no hay token
 router.beforeEach((to, _from, next) => {
   const tieneToken = !!localStorage.getItem('access_token');
-  const esRutaPublica = to.meta.public === true;
-
-  if (!esRutaPublica && !tieneToken) return next('/login');
+  const esPublica  = to.meta.public === true;
+  if (!esPublica && !tieneToken) return next('/login');
   if (to.path === '/login' && tieneToken) return next('/');
   next();
 });

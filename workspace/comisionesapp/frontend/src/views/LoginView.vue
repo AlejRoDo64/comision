@@ -1,9 +1,13 @@
 <template>
   <div class="login-wrapper">
     <div class="login-card">
+
       <div class="login-brand">
-        <span class="brand-dot"></span>
-        <span>PERMODA</span>
+        <span class="brand-mark">C</span>
+        <div class="brand-text">
+          <span class="brand-name">Automatización Comisiones</span>
+          <span class="brand-sub">Comisiones · Permoda Ltda.</span>
+        </div>
       </div>
 
       <h1>Iniciar sesión</h1>
@@ -16,7 +20,7 @@
             id="email"
             v-model="form.email"
             type="email"
-            placeholder="usuario@permoda.com"
+            placeholder="usuario@permoda.com.co"
             autocomplete="email"
             :disabled="cargando"
           />
@@ -46,6 +50,7 @@
         <p><strong>Demo:</strong> admin@permoda.com / Admin123!</p>
         <p>vendedor@permoda.com / Vendedor123!</p>
       </div>
+
     </div>
   </div>
 </template>
@@ -86,49 +91,76 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: #f2f2f2;
 }
 
+/* ── Card ──────────────────────────────────────────────── */
 .login-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
   border-radius: 14px;
-  padding: 2.5rem 2rem;
+  padding: 2.5rem 2.25rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 4px 24px #0000000d;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
 }
 
+/* ── Brand ─────────────────────────────────────────────── */
 .login-brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 800;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  background: #111111;
+  color: #ffffff;
   font-size: 1.1rem;
-  color: #1a1a2e;
-  margin-bottom: 1.75rem;
+  font-weight: 900;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
 }
 
-.brand-dot {
-  width: 10px;
-  height: 10px;
-  background: #7c3aed;
-  border-radius: 50%;
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
+.brand-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111111;
+}
+
+.brand-sub {
+  font-size: 0.72rem;
+  color: #888888;
+  font-weight: 400;
+}
+
+/* ── Titles ────────────────────────────────────────────── */
 h1 {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #111111;
   margin-bottom: 0.25rem;
 }
 
 .login-sub {
-  color: #64748b;
+  color: #666666;
   font-size: 0.875rem;
   margin-bottom: 1.75rem;
 }
 
+/* ── Form ──────────────────────────────────────────────── */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -139,58 +171,66 @@ h1 {
 label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #374151;
+  color: #333333;
 }
 
 input {
-  border: 1px solid #d1d5db;
+  border: 1px solid #d0d0d0;
   border-radius: 8px;
   padding: 0.65rem 0.85rem;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #111111;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
+
+input::placeholder { color: #aaaaaa; }
 
 input:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px #7c3aed22;
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
 }
 
-input:disabled { background: #f9fafb; cursor: not-allowed; }
+input:disabled { background: #f5f5f5; cursor: not-allowed; color: #999999; }
 
+/* ── Error ─────────────────────────────────────────────── */
 .error-msg {
-  background: #fef2f2;
+  background: #fff5f5;
   color: #b91c1c;
-  border: 1px solid #fecaca;
+  border: 1px solid #f5c6c6;
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   margin-bottom: 0.75rem;
 }
 
+/* ── Submit ────────────────────────────────────────────── */
 .btn-login {
   width: 100%;
-  background: #7c3aed;
-  color: #fff;
+  background: #111111;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 0.7rem;
+  padding: 0.72rem;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
   margin-top: 0.25rem;
+  letter-spacing: 0.01em;
 }
 
-.btn-login:hover:not(:disabled) { background: #6d28d9; }
-.btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-login:hover:not(:disabled) { background: #333333; }
+.btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Hint ──────────────────────────────────────────────── */
 .login-hint {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #ebebeb;
   font-size: 0.78rem;
-  color: #94a3b8;
-  line-height: 1.7;
+  color: #999999;
+  line-height: 1.8;
 }
 </style>

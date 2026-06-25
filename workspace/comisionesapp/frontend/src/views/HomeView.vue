@@ -1,51 +1,64 @@
 <template>
   <div class="home">
+
+    <!-- Hero -->
     <div class="hero">
-      <h1>Stack Oficial <span>PERMODA</span></h1>
-      <p>Entorno de aprendizaje con NestJS + Vue 3.4</p>
-      <div class="badges">
-        <span class="badge blue">Node.js 22 LTS</span>
-        <span class="badge purple">NestJS 10</span>
-        <span class="badge green">Vue 3.4</span>
-        <span class="badge orange">Pinia</span>
-        <span class="badge gray">pnpm</span>
-      </div>
+      <div class="hero-badge">Sistema de Liquidación</div>
+      <h1>Automatización <span>Comisiones</span></h1>
+      <p>Plataforma de automatización para la liquidación y trazabilidad de comisiones de ventas — Permoda Ltda.</p>
     </div>
 
+    <!-- Módulos -->
+    <div class="section-label">Módulos del sistema</div>
     <div class="cards">
       <div class="card">
-        <h3>Backend</h3>
+        <div class="card-num">01</div>
+        <h3>Calendarios y Períodos</h3>
         <ul>
-          <li>NestJS con TypeScript</li>
-          <li>CRUD con ValidationPipe</li>
-          <li>Swagger en <code>/api/docs</code></li>
-          <li>CORS configurado para :5173</li>
+          <li>Creación de calendarios anuales</li>
+          <li>Configuración masiva de períodos</li>
+          <li>Validación de no solapamiento</li>
+          <li>Estados automáticos por liquidación</li>
         </ul>
       </div>
       <div class="card">
-        <h3>Frontend</h3>
+        <div class="card-num">02</div>
+        <h3>Parametrización</h3>
         <ul>
-          <li>Vue 3.4 con Composition API</li>
-          <li>Pinia para estado global</li>
-          <li>Vue Router con lazy loading</li>
-          <li>Axios con proxy Vite</li>
+          <li>Cargos y esquemas de comisión</li>
+          <li>Tipos de liquidación y distribución</li>
+          <li>Tablas de presupuesto y crecimiento</li>
+          <li>Versionamiento por período</li>
         </ul>
       </div>
       <div class="card">
-        <h3>Demo</h3>
+        <div class="card-num">03</div>
+        <h3>Motor de Liquidación</h3>
         <ul>
-          <li>Módulo Productos (CRUD)</li>
-          <li>Store reactivo con Pinia</li>
-          <li>Formulario de creación</li>
-          <li>Eliminar y actualizar</li>
+          <li>Integración ICG y Midasoft</li>
+          <li>Normalización financiera con IVA</li>
+          <li>Distribución individual y global</li>
+          <li>Generación de archivo Midasoft</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-num">04</div>
+        <h3>Trazabilidad</h3>
+        <ul>
+          <li>Consulta histórica inmutable</li>
+          <li>Drill-down hasta detalle</li>
+          <li>Exportación de resultados</li>
+          <li>Log de auditoría completo</li>
         </ul>
       </div>
     </div>
 
+    <!-- Acciones -->
     <div class="links">
-      <RouterLink to="/productos" class="btn-primary">Ver Productos</RouterLink>
+      <RouterLink to="/productos" class="btn-primary">Ir a Productos</RouterLink>
       <a href="http://localhost:3000/api/docs" target="_blank" class="btn-outline">Swagger Docs</a>
     </div>
+
   </div>
 </template>
 
@@ -54,78 +67,141 @@ import { RouterLink } from 'vue-router';
 </script>
 
 <style scoped>
-.home { display: flex; flex-direction: column; gap: 2rem; }
+.home { display: flex; flex-direction: column; gap: 1.75rem; }
 
+/* ── Hero ──────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #fff;
-  padding: 3rem 2rem;
+  background: #111111;
+  color: #ffffff;
+  padding: 3rem 2.5rem;
   border-radius: 12px;
-  text-align: center;
 }
 
-.hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-.hero h1 span { color: #a78bfa; }
-.hero p { color: #94a3b8; margin-bottom: 1.5rem; }
-
-.badges { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
-.badge {
-  padding: 0.25rem 0.75rem;
+.hero-badge {
+  display: inline-block;
+  border: 1px solid #333333;
+  color: #888888;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  margin-bottom: 1rem;
 }
-.badge.blue { background: #1e40af22; color: #60a5fa; border: 1px solid #1e40af; }
-.badge.purple { background: #6d28d922; color: #a78bfa; border: 1px solid #6d28d9; }
-.badge.green { background: #16653122; color: #4ade80; border: 1px solid #166534; }
-.badge.orange { background: #92400e22; color: #fb923c; border: 1px solid #92400e; }
-.badge.gray { background: #37415122; color: #94a3b8; border: 1px solid #374151; }
 
+.hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+  line-height: 1.2;
+}
+
+.hero h1 span { color: #cccccc; }
+
+.hero p {
+  color: #888888;
+  font-size: 0.95rem;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+/* ── Section label ─────────────────────────────────────── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888888;
+  border-bottom: 1px solid #dcdcdc;
+  padding-bottom: 0.5rem;
+}
+
+/* ── Cards ─────────────────────────────────────────────── */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 1rem;
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
   border-radius: 10px;
   padding: 1.5rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
 
-.card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; color: #1a1a2e; }
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: #b8b8b8;
+}
 
-.card ul { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
-.card li { font-size: 0.875rem; color: #475569; padding-left: 1rem; position: relative; }
-.card li::before { content: '→'; position: absolute; left: 0; color: #a78bfa; }
+.card-num {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #bbbbbb;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
 
-code { background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.8em; }
+.card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 0.85rem;
+}
 
+.card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card li {
+  font-size: 0.85rem;
+  color: #555555;
+  padding-left: 1rem;
+  position: relative;
+  line-height: 1.4;
+}
+
+.card li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: #aaaaaa;
+  font-size: 0.75rem;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
 .links { display: flex; gap: 1rem; flex-wrap: wrap; }
 
 .btn-primary {
-  background: #7c3aed;
-  color: #fff;
+  background: #111111;
+  color: #ffffff;
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
-.btn-primary:hover { background: #6d28d9; }
+
+.btn-primary:hover { background: #333333; }
 
 .btn-outline {
   background: transparent;
-  color: #7c3aed;
+  color: #111111;
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  border: 2px solid #7c3aed;
-  transition: all 0.2s;
+  border: 1.5px solid #111111;
+  transition: all 0.15s;
 }
-.btn-outline:hover { background: #7c3aed; color: #fff; }
+
+.btn-outline:hover { background: #111111; color: #ffffff; }
 </style>
