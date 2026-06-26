@@ -7,9 +7,10 @@ import { GrupoTiendas } from '../src/modules/catalogos/entities/grupo-tiendas.en
 import { Tienda } from '../src/modules/catalogos/entities/tienda.entity';
 import { Colaborador } from '../src/modules/catalogos/entities/colaborador.entity';
 import { VentaICG } from '../src/modules/catalogos/entities/venta-icg.entity';
+import { AuditLog } from '../src/modules/auditoria/entities/audit-log.entity';
 import { SeedService } from './seed.service';
 
-const ENTITIES = [Calendario, Periodo, GrupoTiendas, Tienda, Colaborador, VentaICG];
+const ENTITIES = [Calendario, Periodo, GrupoTiendas, Tienda, Colaborador, VentaICG, AuditLog];
 
 @Module({
   imports: [
@@ -20,12 +21,13 @@ const ENTITIES = [Calendario, Periodo, GrupoTiendas, Tienda, Colaborador, VentaI
       useFactory: (cfg: ConfigService) => {
         const isProd = cfg.get<string>('NODE_ENV') === 'production';
         const dbType = cfg.get<string>('DB_TYPE', 'mssql');
+        const dbPort = Number(cfg.get<string>('DB_PORT', dbType === 'mysql' ? '3306' : '1433'));
 
         if (dbType === 'mysql') {
           return {
             type: 'mysql' as const,
             host: cfg.get<string>('DB_HOST', 'localhost'),
-            port: cfg.get<number>('DB_PORT', 3306),
+            port: dbPort,
             username: cfg.get<string>('DB_USERNAME'),
             password: cfg.get<string>('DB_PASSWORD'),
             database: cfg.get<string>('DB_DATABASE'),
@@ -38,7 +40,7 @@ const ENTITIES = [Calendario, Periodo, GrupoTiendas, Tienda, Colaborador, VentaI
         return {
           type: 'mssql' as const,
           host: cfg.get<string>('DB_HOST', 'localhost'),
-          port: cfg.get<number>('DB_PORT', 1433),
+          port: dbPort,
           username: cfg.get<string>('DB_USERNAME'),
           password: cfg.get<string>('DB_PASSWORD'),
           database: cfg.get<string>('DB_DATABASE'),

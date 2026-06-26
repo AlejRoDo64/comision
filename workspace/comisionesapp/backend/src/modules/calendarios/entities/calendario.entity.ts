@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -9,11 +10,13 @@ import {
 import { Periodo } from './periodo.entity';
 
 @Entity('calendario')
+@Index('idx_calendario_anio', ['anio'])
+@Index('uq_calendario_nombre_anio', ['nombre', 'anio'], { unique: true })
 export class Calendario {
   @PrimaryGeneratedColumn('uuid', { name: 'id_calendario' })
   idCalendario: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 150 })
   nombre: string;
 
   @Column({ type: 'int' })

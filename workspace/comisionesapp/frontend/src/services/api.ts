@@ -56,6 +56,29 @@ export interface CrearProductoDto {
   stock: number;
 }
 
+export interface Periodo {
+  idPeriodo: string;
+  calendarioId: string;
+  codigo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  estadoOperativo: string;
+}
+
+export interface Calendario {
+  idCalendario: string;
+  nombre: string;
+  anio: number;
+  estadoActivo: boolean;
+  periodos: Periodo[];
+}
+
+export interface CrearPeriodoDto {
+  codigo: string;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────
 export const authApi = {
   login: (email: string, password: string) =>
@@ -73,4 +96,10 @@ export const productosApi = {
     api.patch<Producto>(`/productos/${id}`, dto).then((r) => r.data),
   remove: (id: number) =>
     api.delete<{ mensaje: string }>(`/productos/${id}`).then((r) => r.data),
+};
+
+export const calendariosApi = {
+  getAll: () => api.get<Calendario[]>('/calendarios').then((r) => r.data),
+  createPeriodo: (idCalendario: string, dto: CrearPeriodoDto) =>
+    api.post<Periodo>(`/calendarios/${idCalendario}/periodos`, dto).then((r) => r.data),
 };

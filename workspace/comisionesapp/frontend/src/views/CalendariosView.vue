@@ -114,10 +114,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { calendariosApi, type Calendario, type Periodo } from '@/services/api';
 
 const mostrarForm = ref(false);
-const calActivo   = ref('Comisiones 2026');
+const calActivo = ref('');
+const data = ref<Calendario[]>([]);
 
 const form = ref({ calendario: '', codigo: '', inicio: '', fin: '' });
 
@@ -125,10 +127,38 @@ const formValido = computed(() =>
   form.value.calendario && form.value.codigo && form.value.inicio && form.value.fin
 );
 
-function guardarPeriodo() {
-  // TODO: llamar API POST /periodos
+const calendarios = computed(() => data.value.map((c) => c.nombre));
+
+const calendarioActivo = computed(() =>
+  data.value.find((c) => c.nombre === calActivo.value)
+);
+
+const periodosActivos = computed(() =>
+  calendarioActivo.value?.periodos.map(mapPeriodo) ?? []
+);
+
+onMounted(cargarCalendarios);
+
+async function cargarCalendarios() {
+  data.value = await calendariosApi.getAll();
+  if (!calActivo.value && data.value.length > 0) {
+    calActivo.value = data.value[0].nombre;
+  }
+}
+
+async function guardarPeriodo() {
+  const calendario = data.value.find((c) => c.nombre === form.value.calendario);
+  if (!calendario) return;
+
+  await calendariosApi.createPeriodo(calendario.idCalendario, {
+    codigo: form.value.codigo,
+    fechaInicio: form.value.inicio,
+    fechaFin: form.value.fin,
+  });
+
   mostrarForm.value = false;
   form.value = { calendario: '', codigo: '', inicio: '', fin: '' };
+  await cargarCalendarios();
 }
 
 function cancelarForm() {
@@ -136,36 +166,47 @@ function cancelarForm() {
   form.value = { calendario: '', codigo: '', inicio: '', fin: '' };
 }
 
-const calendarios = ref(['Comisiones 2026', 'Comisiones 2025']);
+function mapPeriodo(periodo: Periodo) {
+  return {
+    codigo: periodo.codigo,
+    inicio: formatDate(periodo.fechaInicio),
+    fin: formatDate(periodo.fechaFin),
+    dias: daysBetween(periodo.fechaInicio, periodo.fechaFin),
+    estado: estadoLabel(periodo.estadoOperativo),
+    cls: estadoClass(periodo.estadoOperativo),
+  };
+}
 
-const todos = ref([
-  { cal: 'Comisiones 2026', codigo: 'ENE-2026', inicio: '21/12/2025', fin: '20/01/2026', dias: 31, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2026', codigo: 'FEB-2026', inicio: '21/01/2026', fin: '20/02/2026', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2026', codigo: 'MAR-2026', inicio: '21/02/2026', fin: '20/03/2026', dias: 28, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2026', codigo: 'ABR-2026', inicio: '21/03/2026', fin: '20/04/2026', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2026', codigo: 'MAY-2026', inicio: '21/04/2026', fin: '20/05/2026', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2026', codigo: 'JUN-2026', inicio: '21/05/2026', fin: '20/06/2026', dias: 30, estado: 'En curso', cls: 's-active' },
-  { cal: 'Comisiones 2026', codigo: 'JUL-2026', inicio: '21/06/2026', fin: '20/07/2026', dias: 30, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2026', codigo: 'AGO-2026', inicio: '21/07/2026', fin: '20/08/2026', dias: 31, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2026', codigo: 'SEP-2026', inicio: '21/08/2026', fin: '20/09/2026', dias: 31, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2026', codigo: 'OCT-2026', inicio: '21/09/2026', fin: '20/10/2026', dias: 30, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2026', codigo: 'NOV-2026', inicio: '21/10/2026', fin: '20/11/2026', dias: 31, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2026', codigo: 'DIC-2026', inicio: '21/11/2026', fin: '20/12/2026', dias: 30, estado: 'Abierto',  cls: 's-open'   },
-  { cal: 'Comisiones 2025', codigo: 'ENE-2025', inicio: '21/12/2024', fin: '20/01/2025', dias: 31, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'FEB-2025', inicio: '21/01/2025', fin: '20/02/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'MAR-2025', inicio: '21/02/2025', fin: '20/03/2025', dias: 28, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'ABR-2025', inicio: '21/03/2025', fin: '20/04/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'MAY-2025', inicio: '21/04/2025', fin: '20/05/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'JUN-2025', inicio: '21/05/2025', fin: '20/06/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'JUL-2025', inicio: '21/06/2025', fin: '20/07/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'AGO-2025', inicio: '21/07/2025', fin: '20/08/2025', dias: 31, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'SEP-2025', inicio: '21/08/2025', fin: '20/09/2025', dias: 31, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'OCT-2025', inicio: '21/09/2025', fin: '20/10/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'NOV-2025', inicio: '21/10/2025', fin: '20/11/2025', dias: 31, estado: 'Cerrado',  cls: 's-closed' },
-  { cal: 'Comisiones 2025', codigo: 'DIC-2025', inicio: '21/11/2025', fin: '20/12/2025', dias: 30, estado: 'Cerrado',  cls: 's-closed' },
-]);
+function formatDate(value: string) {
+  const [year, month, day] = value.split('-');
+  return `${day}/${month}/${year}`;
+}
 
-const periodosActivos = computed(() => todos.value.filter(p => p.cal === calActivo.value));
+function daysBetween(start: string, end: string) {
+  const startDate = new Date(`${start}T00:00:00`);
+  const endDate = new Date(`${end}T00:00:00`);
+  return Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+}
+
+function estadoLabel(value: string) {
+  const labels: Record<string, string> = {
+    Abierto: 'Abierto',
+    EnCurso: 'En curso',
+    Liquidado: 'Liquidado',
+    Cerrado: 'Cerrado',
+  };
+  return labels[value] ?? value;
+}
+
+function estadoClass(value: string) {
+  const classes: Record<string, string> = {
+    Abierto: 's-open',
+    EnCurso: 's-active',
+    Liquidado: 's-closed',
+    Cerrado: 's-closed',
+  };
+  return classes[value] ?? 's-open';
+}
 </script>
 
 <style scoped>
