@@ -108,26 +108,34 @@ tr:hover td { background: var(--surface-2); }
 .s-ok     { background: #dcf3e8; color: #15803d; }
 .s-err    { background: #fde4e4; color: #b91c1c; }
 
-/* Buttons — variantes del design system: Primary / Secondary / Inverted / Outlined */
+/* Buttons — base BLANCA (outlined); NEGRO solo en el estado seleccionado:
+   hover, presionado (:active) o marcado con la clase .activo. */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
-  background: var(--primary); color: var(--secondary);
-  border: 1.5px solid var(--primary); border-radius: var(--radius-sm);
+  background: var(--secondary); color: var(--text);
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
   padding: 7px 15px; font-size: 0.8rem; font-weight: 700;
   font-family: inherit; cursor: pointer; text-decoration: none;
   transition: background 0.13s, border-color 0.13s, color 0.13s;
   white-space: nowrap;
 }
-.btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-.btn.secondary { background: var(--surface-2); color: var(--text); border-color: var(--surface-2); }
-.btn.secondary:hover { background: var(--border); border-color: var(--border); }
-.btn.inverted { background: var(--neutral); color: var(--secondary); border-color: var(--neutral); }
-.btn.inverted:hover { background: #1e293b; border-color: #1e293b; }
-.btn.outlined, .btn.ghost { background: var(--secondary); color: var(--text); border-color: var(--border-strong); }
-.btn.outlined:hover, .btn.ghost:hover { background: var(--surface-2); border-color: var(--neutral); }
+.btn:hover:not(:disabled),
+.btn:active:not(:disabled),
+.btn.activo {
+  background: var(--primary); border-color: var(--primary); color: var(--secondary);
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* Variantes heredan la misma base blanca; se conservan por compatibilidad */
+.btn.secondary, .btn.inverted, .btn.outlined, .btn.ghost {
+  background: var(--secondary); color: var(--text); border-color: var(--border-strong);
+}
 .btn.sm { padding: 4px 11px; font-size: 0.74rem; }
-.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
-.btn.danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+/* Peligro: blanco con acento rojo; rojo sólido solo al seleccionar */
+.btn.danger { background: var(--secondary); border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover:not(:disabled),
+.btn.danger:active:not(:disabled) {
+  background: var(--danger); border-color: var(--danger); color: #fff;
+}
 /* Botón de icono: acciones compactas en tablas (editar, eliminar, etc.) */
 .btn.icon { padding: 4px 7px; }
 .btn.icon i { font-size: 0.85rem; }
@@ -320,13 +328,16 @@ tr:hover td { background: var(--surface-2); }
   padding: 0.6rem 0.85rem; font-size: 0.84rem; margin-bottom: 0.75rem;
 }
 .btn-login {
-  width: 100%; background: var(--primary); color: var(--secondary);
-  border: 1.5px solid var(--primary); border-radius: var(--radius-sm);
+  width: 100%; background: var(--secondary); color: var(--text);
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
   padding: 0.72rem; font-size: 0.95rem; font-weight: 700; font-family: inherit;
-  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
   margin-top: 0.25rem; letter-spacing: 0.01em;
 }
-.btn-login:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn-login:hover:not(:disabled),
+.btn-login:active:not(:disabled) {
+  background: var(--primary); border-color: var(--primary); color: var(--secondary);
+}
 .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Contenedores raíz de vistas ──────────────────────────────────── */
