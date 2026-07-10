@@ -20,7 +20,7 @@
             id="email"
             v-model="form.email"
             type="email"
-            placeholder="usuario@permoda.com.co"
+            placeholder="usuario@permoda.com"
             autocomplete="email"
             :disabled="cargando"
           />
@@ -45,11 +45,6 @@
           <span v-else>Ingresar</span>
         </button>
       </form>
-
-      <div class="login-hint">
-        <p><strong>Demo:</strong> admin@permoda.com / Admin123!</p>
-        <p>vendedor@permoda.com / Vendedor123!</p>
-      </div>
 
     </div>
   </div>
@@ -223,14 +218,4 @@ input:disabled { background: #f5f5f5; cursor: not-allowed; color: #999999; }
 
 .btn-login:hover:not(:disabled) { background: #333333; }
 .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ── Hint ──────────────────────────────────────────────── */
-.login-hint {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #ebebeb;
-  font-size: 0.78rem;
-  color: #999999;
-  line-height: 1.8;
-}
 </style>

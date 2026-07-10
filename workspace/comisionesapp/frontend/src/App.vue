@@ -58,6 +58,14 @@
           <i class="ti ti-file-analytics"></i>
           <span>Trazabilidad y salida</span>
         </RouterLink>
+        <RouterLink
+          to="/datos"
+          class="nav-item"
+          :class="{ active: route.path.startsWith('/datos') }"
+        >
+          <i class="ti ti-database-search"></i>
+          <span>Datos de origen</span>
+        </RouterLink>
 
         <span class="nav-sect" style="margin-top:8px">Sistema</span>
 
@@ -80,10 +88,9 @@
     <div class="app-body">
       <header class="topbar">
         <div class="topbar-title">{{ paginaTitulo }}</div>
-        <span class="topbar-periodo">Período activo: JUN-2026</span>
         <div class="topbar-sep"></div>
         <div class="topbar-user">
-          <span class="user-rol">{{ authStore.user?.rol }}</span>
+          <span class="user-rol">{{ rolLegible }}</span>
           <span class="user-name">{{ authStore.user?.nombre }}</span>
           <button class="btn-logout" @click="handleLogout">
             <i class="ti ti-logout" style="font-size:0.85rem"></i> Salir
@@ -92,6 +99,10 @@
       </header>
 
       <main class="app-content">
+        <!-- Breadcrumb único del shell — antes copiado en cada vista -->
+        <div v-if="route.meta.title" class="breadcrumb">
+          Automatización Comisiones / <strong>{{ route.meta.title }}</strong>
+        </div>
         <RouterView />
       </main>
     </div>
@@ -108,15 +119,19 @@ const router     = useRouter();
 const route      = useRoute();
 const authStore  = useAuthStore();
 
-const TITULOS: Record<string, string> = {
-  '/':               'Resumen general',
-  '/calendarios':    'HU01 — Calendarios y períodos',
-  '/parametrizacion':'HU02 — Parametrización de cargos',
-  '/liquidacion':    'HU03 — Liquidación automática',
-  '/trazabilidad':   'HU04 — Trazabilidad y salida',
+// El título vive en meta.title de cada ruta (router/index.ts) — única fuente
+const paginaTitulo = computed(
+  () => (route.meta.title as string | undefined) ?? 'Automatización Comisiones',
+);
+
+const ROLES_LEGIBLES: Record<string, string> = {
+  ADMINISTRADOR: 'Administrador',
+  PROFESIONAL_COMISIONES: 'Profesional de Comisiones',
 };
 
-const paginaTitulo = computed(() => TITULOS[route.path] ?? 'Automatización Comisiones');
+const rolLegible = computed(() =>
+  authStore.user ? ROLES_LEGIBLES[authStore.user.rol] ?? authStore.user.rol : '',
+);
 
 function handleLogout() {
   authStore.logout();
@@ -271,16 +286,6 @@ function handleLogout() {
   font-size: 0.84rem;
   font-weight: 700;
   color: #111;
-  flex-shrink: 0;
-}
-
-.topbar-periodo {
-  font-size: 0.69rem;
-  background: #e4f5ed;
-  color: #1a6644;
-  padding: 2px 9px;
-  border-radius: 8px;
-  font-weight: 700;
   flex-shrink: 0;
 }
 

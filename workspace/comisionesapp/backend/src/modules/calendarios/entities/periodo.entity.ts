@@ -21,7 +21,7 @@ export class Periodo {
   @PrimaryGeneratedColumn('uuid', { name: 'id_periodo' })
   idPeriodo: string;
 
-  @ManyToOne(() => Calendario, (c) => c.periodos, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Calendario, (c) => c.periodos, { onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'id_calendario' })
   calendario: Calendario;
 

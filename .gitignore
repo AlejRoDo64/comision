@@ -28,3 +28,9 @@ Thumbs.db
 
 # Office temporary files
 ~$*
+
+# Salidas generadas por la liquidación (archivos planos de nómina)
+workspace/comisionesapp/backend/liquidaciones/
+
+# Datos personales de empleados — nunca subir al repositorio
+Datatest/BaseEmpleados*.txt

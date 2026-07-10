@@ -1,241 +1,374 @@
 <template>
   <div class="traz-view">
-    <div class="breadcrumb">Automatización Comisiones / <strong>Trazabilidad y salida</strong></div>
 
     <div class="page-hd">
       <h2>Trazabilidad y salida</h2>
       <div class="btn-group">
-        <button class="btn sm ghost"><i class="ti ti-printer"></i> Imprimir</button>
-        <button class="btn sm ghost"><i class="ti ti-download"></i> Exportar CSV</button>
-        <button class="btn sm"><i class="ti ti-file-export"></i> Generar Midasoft</button>
+        <button class="btn sm ghost" @click="consultar" :disabled="cargando">
+          <i class="ti ti-refresh"></i> Consultar
+        </button>
+        <button
+          v-if="liquidacionDetalle"
+          class="btn sm"
+          :disabled="cargando"
+          @click="exportarCsv"
+        >
+          <i class="ti ti-download"></i> Exportar CSV
+        </button>
       </div>
+    </div>
+
+    <div v-if="error" class="info-box danger">
+      <i class="ti ti-alert-circle"></i> <span>{{ error }}</span>
     </div>
 
     <div class="info-box">
       <i class="ti ti-lock"></i>
       <span>
-        Esta vista es de <strong>solo lectura</strong>. Los registros de liquidaciones cerradas
-        son inmutables. Para corregir un período use el proceso de reliquidación desde HU-03.
+        Esta vista es de <strong>solo lectura</strong> sobre liquidaciones
+        <em>LIQUIDADO</em> o <em>CERRADO</em>. Cada consulta queda registrada en
+        la bitácora de auditoría.
       </span>
     </div>
 
     <!-- Filtros -->
-    <div class="card" style="margin-bottom:14px; padding:12px 16px">
-      <div class="filtros-row">
-        <div class="field" style="min-width:160px">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title"><i class="ti ti-filter"></i> Filtros</div>
+      <div class="form-row fc3">
+        <div class="field">
           <label>Calendario</label>
-          <select v-model="filtro.calendario">
+          <select v-model="filtros.idCalendario" :disabled="cargando" @change="onFiltroCalendario">
             <option value="">Todos</option>
-            <option>Comisiones 2026</option>
-            <option>Comisiones 2025</option>
+            <option v-for="c in calendarios" :key="c.idCalendario" :value="c.idCalendario">
+              {{ c.nombre }}
+            </option>
           </select>
         </div>
-        <div class="field" style="min-width:140px">
+        <div class="field">
           <label>Período</label>
-          <select v-model="filtro.periodo">
+          <select v-model="filtros.idPeriodo" :disabled="cargando || !filtros.idCalendario">
             <option value="">Todos</option>
-            <option v-for="p in periodos" :key="p" :value="p">{{ p }}</option>
+            <option v-for="p in periodosFiltro" :key="p.idPeriodo" :value="p.idPeriodo">
+              {{ p.codigo }}
+            </option>
           </select>
         </div>
-        <div class="field" style="min-width:160px">
-          <label>Grupo de tiendas</label>
-          <select v-model="filtro.grupo">
-            <option value="">Todos los grupos</option>
-            <option>Grupo Norte</option>
-            <option>Grupo Centro</option>
-            <option>Grupo Sur</option>
+        <div class="field">
+          <label>Tipo liquidación</label>
+          <select v-model="filtros.tipoLiquidacion" :disabled="cargando">
+            <option value="">Todos</option>
+            <option value="Individual">Individual</option>
+            <option value="GlobalTienda">Global Tienda</option>
+            <option value="GlobalGrupoTiendas">Global Grupo</option>
           </select>
         </div>
-        <div class="field" style="min-width:140px">
-          <label>Tienda</label>
-          <select v-model="filtro.tienda">
-            <option value="">Todas</option>
-            <option>T01 — Centro</option>
-            <option>T02 — Norte</option>
-            <option>T03 — Sur</option>
-          </select>
+      </div>
+      <div class="form-row fc3">
+        <div class="field">
+          <label>Cargo (Midasoft)</label>
+          <input v-model="filtros.codigoOficio" :disabled="cargando" placeholder="ej. 104608" />
         </div>
-        <button class="btn sm" style="align-self:flex-end"><i class="ti ti-search"></i> Consultar</button>
+        <div class="field">
+          <label>Comisión mínima</label>
+          <input v-model.number="filtros.comisionMin" type="number" min="0" :disabled="cargando" />
+        </div>
+        <div class="field">
+          <label>Comisión máxima</label>
+          <input v-model.number="filtros.comisionMax" type="number" min="0" :disabled="cargando" />
+        </div>
       </div>
     </div>
 
-    <!-- Tabla de resumen por tienda con drill-down -->
+    <!-- Resumen -->
     <div class="card" style="margin-bottom:14px">
       <div class="card-title" style="justify-content:space-between">
-        <span><i class="ti ti-building-store"></i> Resumen por tienda — MAY-2026</span>
-        <span class="tag">{{ tiendas.length }} tiendas</span>
+        <span><i class="ti ti-list-details"></i> Resumen de liquidaciones</span>
+        <span class="tag">{{ cargando ? 'Consultando…' : resumen.length + ' liquidaciones' }}</span>
       </div>
-      <div class="tbl-wrap">
+
+      <div v-if="!cargando && !resumen.length" class="empty-state">
+        <i class="ti ti-database-off" style="font-size:2rem; color:#ccc; display:block; margin-bottom:8px"></i>
+        <p>No hay liquidaciones que coincidan con los filtros aplicados.</p>
+        <p style="font-size:0.74rem">Las liquidaciones en estado <strong>LIQUIDADO</strong> o <strong>CERRADO</strong> aparecerán aquí.</p>
+      </div>
+
+      <div v-else class="tbl-wrap">
         <table>
           <thead>
             <tr>
-              <th style="width:28px"></th>
-              <th>Tienda</th>
-              <th>Colaboradores</th>
-              <th>Venta bruta</th>
-              <th>Venta normalizada</th>
-              <th>Com. total</th>
+              <th>Período</th>
               <th>Estado</th>
+              <th>Colaboradores</th>
+              <th>Tiendas</th>
+              <th>Comisión total</th>
+              <th>Inicio</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <template v-for="t in tiendas" :key="t.codigo">
-              <!-- Fila de tienda -->
-              <tr class="row-tienda" @click="toggleDrillDown(t.codigo)">
-                <td style="text-align:center; color:#aaa">
-                  <i :class="['ti', expandidos.has(t.codigo) ? 'ti-chevron-down' : 'ti-chevron-right']"></i>
-                </td>
-                <td style="font-weight:700">{{ t.codigo }} — {{ t.nombre }}</td>
-                <td>{{ t.colaboradores }}</td>
-                <td>{{ fmt(t.ventaBruta) }}</td>
-                <td>{{ fmt(t.ventaNorm) }}</td>
-                <td style="font-weight:700; color:#1a6644">{{ fmt(t.comision) }}</td>
-                <td><span :class="['status', t.cls]">{{ t.estado }}</span></td>
-              </tr>
-              <!-- Filas de detalle por colaborador -->
-              <template v-if="expandidos.has(t.codigo)">
-                <tr
-                  v-for="col in t.colaboradores_data"
-                  :key="col.id"
-                  class="row-colaborador"
-                >
-                  <td></td>
-                  <td style="padding-left:28px; color:#555">
-                    <i class="ti ti-user" style="font-size:0.75rem; margin-right:4px; color:#bbb"></i>
-                    {{ col.nombre }}
-                  </td>
-                  <td style="color:#888">{{ col.cargo }}</td>
-                  <td style="color:#888">{{ fmt(col.ventaBruta) }}</td>
-                  <td style="color:#888">{{ fmt(col.ventaNorm) }}</td>
-                  <td style="font-weight:600; color:#1a6644">{{ fmt(col.comision) }}</td>
-                  <td></td>
-                </tr>
-              </template>
-            </template>
-          </tbody>
-          <tfoot>
-            <tr class="row-total">
-              <td></td>
-              <td style="font-weight:700">TOTAL</td>
-              <td>20</td>
-              <td style="font-weight:700">{{ fmt(totalBruta) }}</td>
-              <td style="font-weight:700">{{ fmt(totalNorm) }}</td>
-              <td style="font-weight:700; color:#1a6644">{{ fmt(totalCom) }}</td>
-              <td></td>
+            <tr v-for="r in resumen" :key="r.idLiquidacion">
+              <td style="font-weight:700">{{ r.periodoCodigo }}</td>
+              <td><span :class="['status', clsEstado(r.estado)]">{{ r.estado }}</span></td>
+              <td>{{ r.totalColaboradores }}</td>
+              <td>{{ r.totalTiendas }}</td>
+              <td style="font-weight:700">${{ r.totalComision.toLocaleString('es-CO') }}</td>
+              <td style="font-size:0.74rem">{{ formatFecha(r.fechaInicio) }}</td>
+              <td>
+                <button class="btn sm ghost" style="padding:2px 8px" @click="cargarDetalle(r.idLiquidacion)">
+                  <i class="ti ti-eye"></i> Ver colaboradores
+                </button>
+              </td>
             </tr>
-          </tfoot>
+          </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Log de auditoría -->
-    <div class="card">
-      <div class="card-title"><i class="ti ti-shield-check"></i> Log de auditoría — MAY-2026</div>
-      <div>
-        <div v-for="a in auditLog" :key="a.msg" class="audit-item">
-          <div :class="['audit-dot', a.dot]"></div>
-          <div class="audit-content">
-            <div class="audit-text">{{ a.msg }}</div>
-            <div class="audit-meta">{{ a.meta }}</div>
-          </div>
-        </div>
+    <!-- Detalle por colaboradores -->
+    <div v-if="liquidacionDetalle" class="card" style="margin-bottom:14px">
+      <div class="card-title" style="justify-content:space-between">
+        <span><i class="ti ti-building-store"></i> Detalle por colaboradores — {{ liquidacionDetalle.periodoCodigo }}</span>
+        <button class="btn sm ghost" style="padding:2px 8px" @click="liquidacionDetalle = null">
+          <i class="ti ti-x"></i> Cerrar
+        </button>
+      </div>
+
+      <div v-if="!colaboradoresDetalle.length" class="empty-state">
+        <p>Esta liquidación no tiene colaboradores asociados.</p>
+      </div>
+
+      <div v-else class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Cargo</th>
+              <th>Tienda</th>
+              <th>Venta bruta</th>
+              <th>Sin IVA</th>
+              <th>Com. bancaria</th>
+              <th>Venta neta</th>
+              <th>%</th>
+              <th>Comisión</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="c in colaboradoresDetalle" :key="c.idColaborador">
+              <tr class="row-tienda" @click="toggleDrillDown(c.idColaborador)">
+                <td style="font-weight:700">
+                  <i :class="['ti', expandidos.has(c.idColaborador) ? 'ti-chevron-down' : 'ti-chevron-right']" style="margin-right:6px"></i>
+                  {{ c.idColaborador }}
+                </td>
+                <td>{{ c.idCargo }}</td>
+                <td>{{ c.idTienda ?? '—' }}</td>
+                <td>{{ fmt(c.base.ventaBruta) }}</td>
+                <td>{{ fmt(c.base.ventaSinIva) }}</td>
+                <td>{{ fmt(c.base.comisionBancaria) }}</td>
+                <td>{{ fmt(c.base.ventaNeta) }}</td>
+                <td>{{ c.base.porcentajeAplicado }}%</td>
+                <td style="font-weight:700; color:#1a6644">{{ fmt(c.base.comision) }}</td>
+              </tr>
+              <tr v-if="expandidos.has(c.idColaborador)" class="row-colaborador">
+                <td colspan="9" style="background:#fafafa; padding:12px 16px">
+                  <div class="g-row g3" style="margin-bottom:8px">
+                    <div>
+                      <strong>Subperíodo:</strong> {{ c.afectacion.fechaInicioSub }} → {{ c.afectacion.fechaFinSub }}
+                      <span class="tag" style="margin-left:6px">{{ c.afectacion.motivo }}</span>
+                    </div>
+                    <div>
+                      <strong>Días laborados:</strong> {{ c.base.diasLaborados ?? '—' }}
+                      <strong style="margin-left:12px">Días excluidos:</strong> {{ c.base.diasExcluidos ?? '—' }}
+                      <span v-if="c.base.motivoExclusion" class="tag" style="margin-left:6px; background:#fff0f0; color:#b91c1c">
+                        {{ c.base.motivoExclusion }}
+                      </span>
+                    </div>
+                    <div>
+                      <strong>Parametrización:</strong>
+                      <span v-if="c.parametrizacion">
+                        {{ c.parametrizacion.tipoLiquidacion }} · {{ c.parametrizacion.tipoDistribucion }}
+                        — Línea {{ c.parametrizacion.porcLinea }}% / Prom {{ c.parametrizacion.porcPromocion }}%
+                        <span v-if="c.parametrizacion.estrategiaTipoDescuento">
+                          · Estrategia: {{ c.parametrizacion.estrategiaTipoDescuento }}
+                          <span v-if="c.parametrizacion.estrategiaPorcDescuentoCorporativo">
+                            (-{{ c.parametrizacion.estrategiaPorcDescuentoCorporativo }}%)
+                          </span>
+                        </span>
+                      </span>
+                      <span v-else class="tag">Sin snapshot</span>
+                    </div>
+                  </div>
+                  <table style="font-size:0.78rem">
+                    <thead>
+                      <tr>
+                        <th>Tipo venta</th>
+                        <th>Venta bruta</th>
+                        <th>Sin IVA</th>
+                        <th>Com. bancaria</th>
+                        <th>Venta neta</th>
+                        <th>%</th>
+                        <th>Comisión</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="d in c.desglose" :key="d.tipoVenta">
+                        <td>{{ d.tipoVenta }}</td>
+                        <td>{{ fmt(d.ventaBruta) }}</td>
+                        <td>{{ fmt(d.ventaSinIva) }}</td>
+                        <td>{{ fmt(d.comisionBancaria) }}</td>
+                        <td>{{ fmt(d.ventaNeta) }}</td>
+                        <td>{{ d.porcentajeAplicado }}%</td>
+                        <td>{{ fmt(d.comision) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import {
+  calendariosApi,
+  periodosApi,
+  trazabilidadApi,
+  type Calendario,
+  type Periodo,
+  type ResumenTrazabilidad,
+  type DetalleTrazabilidad,
+  type FiltrosTrazabilidad,
+  obtenerMensajeError,
+} from '@/services/api';
+import {
+  clsEstado,
+  formatearFecha as formatFecha,
+  formatearMoneda as fmt,
+} from '@/utils/formato';
 
-const filtro = ref({ calendario: 'Comisiones 2026', periodo: 'MAY-2026', grupo: '', tienda: '' });
+const cargando  = ref(false);
+const error     = ref('');
 
-const periodos = ['ENE-2026','FEB-2026','MAR-2026','ABR-2026','MAY-2026','JUN-2026'];
+const calendarios    = ref<Calendario[]>([]);
+const periodosFiltro = ref<Periodo[]>([]);
+const resumen        = ref<ResumenTrazabilidad[]>([]);
+const liquidacionDetalle    = ref<ResumenTrazabilidad | null>(null);
+const colaboradoresDetalle  = ref<DetalleTrazabilidad[]>([]);
+const expandidos           = ref(new Set<string>());
 
-const expandidos = ref(new Set<string>());
+const filtros = ref<FiltrosTrazabilidad>({
+  idCalendario: '',
+  idPeriodo: '',
+  codigoOficio: '',
+  tipoLiquidacion: undefined,
+  comisionMin: undefined,
+  comisionMax: undefined,
+});
 
-function toggleDrillDown(codigo: string) {
-  if (expandidos.value.has(codigo)) expandidos.value.delete(codigo);
-  else expandidos.value.add(codigo);
+async function exportarCsv() {
+  if (!liquidacionDetalle.value) return;
+  try {
+    await trazabilidadApi.exportarCsv(liquidacionDetalle.value.idLiquidacion);
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'Error al exportar el CSV.');
+  }
 }
 
-function fmt(n: number) {
-  return n.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+async function cargarCalendariosYPeriodos() {
+  try {
+    calendarios.value = await calendariosApi.getAll();
+  } catch {
+    /* silencioso */
+  }
 }
 
-const tiendas = ref([
-  {
-    codigo: 'T01', nombre: 'Tienda Centro', colaboradores: 8,
-    ventaBruta: 42_500_000, ventaNorm: 35_714_286, comision: 714_286,
-    estado: 'Liquidado', cls: 's-liq',
-    colaboradores_data: [
-      { id:'EMP001', nombre:'Juan García',     cargo:'Vendedor', ventaBruta:8_500_000, ventaNorm:7_142_857, comision:142_857 },
-      { id:'EMP002', nombre:'María López',     cargo:'Vendedor', ventaBruta:7_200_000, ventaNorm:6_050_420, comision:121_008 },
-      { id:'EMP003', nombre:'Carlos Rueda',    cargo:'Asesor',   ventaBruta:9_100_000, ventaNorm:7_647_059, comision:152_941 },
-      { id:'EMP004', nombre:'Ana Martínez',    cargo:'Vendedor', ventaBruta:6_300_000, ventaNorm:5_294_118, comision:105_882 },
-      { id:'EMP005', nombre:'Luis Herrera',    cargo:'Vendedor', ventaBruta:4_200_000, ventaNorm:3_529_412, comision:70_588  },
-      { id:'EMP006', nombre:'Paula Jiménez',   cargo:'Asesor',   ventaBruta:3_100_000, ventaNorm:2_605_042, comision:52_101  },
-      { id:'EMP007', nombre:'Diego Cárdenas',  cargo:'Vendedor', ventaBruta:2_800_000, ventaNorm:2_352_941, comision:47_059  },
-      { id:'EMP008', nombre:'Sofía Moreno',    cargo:'Vendedor', ventaBruta:1_300_000, ventaNorm:1_092_437, comision:21_849  },
-    ],
-  },
-  {
-    codigo: 'T02', nombre: 'Tienda Norte', colaboradores: 6,
-    ventaBruta: 28_700_000, ventaNorm: 24_117_647, comision: 482_353,
-    estado: 'Liquidado', cls: 's-liq',
-    colaboradores_data: [
-      { id:'EMP009', nombre:'Camila Vargas',  cargo:'Vendedor', ventaBruta:7_400_000, ventaNorm:6_218_487, comision:124_370 },
-      { id:'EMP010', nombre:'Andrés Torres',  cargo:'Asesor',   ventaBruta:6_800_000, ventaNorm:5_714_286, comision:114_286 },
-      { id:'EMP011', nombre:'Natalia Ríos',   cargo:'Vendedor', ventaBruta:5_600_000, ventaNorm:4_705_882, comision:94_118  },
-      { id:'EMP012', nombre:'Julián Cano',    cargo:'Vendedor', ventaBruta:4_300_000, ventaNorm:3_613_445, comision:72_269  },
-      { id:'EMP013', nombre:'Isabella Díaz',  cargo:'Vendedor', ventaBruta:3_100_000, ventaNorm:2_605_042, comision:52_101  },
-      { id:'EMP014', nombre:'Felipe Ospina',  cargo:'Vendedor', ventaBruta:1_500_000, ventaNorm:1_260_504, comision:25_210  },
-    ],
-  },
-  {
-    codigo: 'T03', nombre: 'Tienda Sur', colaboradores: 6,
-    ventaBruta: 19_200_000, ventaNorm: 16_134_454, comision: 322_689,
-    estado: 'Liquidado', cls: 's-liq',
-    colaboradores_data: [
-      { id:'EMP015', nombre:'Valentina Cruz',  cargo:'Vendedor', ventaBruta:5_100_000, ventaNorm:4_285_714, comision:85_714  },
-      { id:'EMP016', nombre:'Sebastián Leal',  cargo:'Asesor',   ventaBruta:4_200_000, ventaNorm:3_529_412, comision:70_588  },
-      { id:'EMP017', nombre:'Daniela Pardo',   cargo:'Vendedor', ventaBruta:3_700_000, ventaNorm:3_109_244, comision:62_185  },
-      { id:'EMP018', nombre:'Mateo Salcedo',   cargo:'Vendedor', ventaBruta:3_200_000, ventaNorm:2_689_076, comision:53_782  },
-      { id:'EMP019', nombre:'Laura Guzmán',    cargo:'Vendedor', ventaBruta:2_100_000, ventaNorm:1_764_706, comision:35_294  },
-      { id:'EMP020', nombre:'David Mejía',     cargo:'Vendedor', ventaBruta:  900_000, ventaNorm:  756_303, comision:15_126  },
-    ],
-  },
-]);
+async function onFiltroCalendario() {
+  filtros.value.idPeriodo = '';
+  if (filtros.value.idCalendario) {
+    try {
+      periodosFiltro.value = await periodosApi.getByCalendario(filtros.value.idCalendario);
+    } catch {
+      periodosFiltro.value = [];
+    }
+  } else {
+    periodosFiltro.value = [];
+  }
+}
 
-const totalBruta = computed(() => tiendas.value.reduce((s, t) => s + t.ventaBruta, 0));
-const totalNorm  = computed(() => tiendas.value.reduce((s, t) => s + t.ventaNorm, 0));
-const totalCom   = computed(() => tiendas.value.reduce((s, t) => s + t.comision,  0));
+async function consultar() {
+  cargando.value = true;
+  error.value = '';
+  try {
+    const dto: FiltrosTrazabilidad = {};
+    for (const [k, v] of Object.entries(filtros.value)) {
+      if (v !== '' && v != null) (dto as any)[k] = v;
+    }
+    resumen.value = await trazabilidadApi.resumen(dto);
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'Error al consultar.');
+    resumen.value = [];
+  } finally {
+    cargando.value = false;
+  }
+}
 
-const auditLog = ref([
-  { msg: 'Período MAY-2026 marcado como Liquidado',                              meta: '25 may 2026 · 10:42 · sistema',            dot: 'ok'   },
-  { msg: 'Archivo Midasoft generado — 20 colaboradores, $1.519.328 en comisiones', meta: '25 may 2026 · 10:41 · admin@permoda.com', dot: 'ok'   },
-  { msg: 'Comisión bancaria descontada — tipo LÍNEA ESTRATEGIA (mayor valor)',    meta: '25 may 2026 · 10:40 · sistema',            dot: 'info' },
-  { msg: 'Normalización IVA aplicada — 12 ventas divididas por 1.19',            meta: '25 may 2026 · 10:39 · sistema',            dot: 'info' },
-  { msg: 'Fuentes ICG y Midasoft validadas sin errores',                          meta: '25 may 2026 · 10:38 · sistema',            dot: 'ok'   },
-  { msg: 'Liquidación MAY-2026 iniciada por admin@permoda.com',                   meta: '25 may 2026 · 10:37 · admin@permoda.com', dot: 'info' },
-]);
+async function cargarDetalle(idLiquidacion: string) {
+  cargando.value = true;
+  error.value = '';
+  try {
+    const r = resumen.value.find((x) => x.idLiquidacion === idLiquidacion);
+    if (!r) return;
+    liquidacionDetalle.value = r;
+    colaboradoresDetalle.value = [];
+
+    // Los IDs llegan en una llamada batch; el detalle de cada colaborador
+    // aún es una petición individual (tolerante a fallos con allSettled).
+    const ids = await trazabilidadApi.colaboradores(idLiquidacion);
+    if (!ids.length) {
+      cargando.value = false;
+      return;
+    }
+    const detalles: DetalleTrazabilidad[] = [];
+    // Promise.all con manejo tolerante de fallos individuales
+    const results = await Promise.allSettled(
+      ids.map((id) => trazabilidadApi.detalle(idLiquidacion, id)),
+    );
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value) detalles.push(r.value);
+    }
+    colaboradoresDetalle.value = detalles;
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'Error al cargar detalle.');
+  } finally {
+    cargando.value = false;
+  }
+}
+
+function toggleDrillDown(id: string) {
+  if (expandidos.value.has(id)) expandidos.value.delete(id);
+  else expandidos.value.add(id);
+}
+
+onMounted(async () => {
+  await cargarCalendariosYPeriodos();
+  await consultar();
+});
 </script>
 
 <style scoped>
 .traz-view { display: flex; flex-direction: column; }
-
 .filtros-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-
 .row-tienda { cursor: pointer; }
 .row-tienda:hover td { background: #f4f4f4; }
-
 .row-colaborador td { background: #fafafa; }
-.row-colaborador:hover td { background: #f5f5f5; }
-
-.row-total td {
-  border-top: 2px solid #dcdcdc;
-  background: #f7f7f7;
-  font-size: 0.82rem;
-  padding: 10px;
+.empty-state {
+  text-align: center;
+  padding: 28px 12px;
+  color: #888;
+  font-size: 0.84rem;
 }
 </style>

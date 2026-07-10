@@ -1,0 +1,3 @@
+# Dependencias autorizadas a ejecutar scripts de build (pnpm los bloquea por defecto)
+allowBuilds:
+  '@nestjs/core': true
