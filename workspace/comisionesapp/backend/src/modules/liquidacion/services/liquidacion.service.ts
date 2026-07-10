@@ -20,6 +20,7 @@ import { NormalizacionService, VentaBruta } from './normalizacion.service';
 import { SubPeriodoService } from './subperiodo.service';
 import { ReglasComisionService, ResultadoRegla } from './reglas-comision.service';
 import { Marcacion, Novedad } from './afectaciones.service';
+import { codigoOficioBase } from '../../../common/utils/oficio.util';
 import { ArchivoPlanoService } from './archivo-plano.service';
 import { LiquidacionLockService } from './liquidacion-lock.service';
 import { IndicadoresService } from '../../integraciones/indicadores.service';
@@ -590,7 +591,11 @@ export class LiquidacionService implements OnApplicationBootstrap {
         // CÉDULA (columna Cedula del SP), no por el código interno Midasoft.
         idColaborador:       String(e.Docto_Ident ?? ''),
         idMidasoft:          String(e.Empleado ?? ''),
-        idCargoInicial:      String(e.Codigo_Oficio ?? e.Cod_Profesion ?? ''),
+        // Codigo_Oficio llega compuesto (oficio+ccosto+000) → base de 6 dígitos
+        idCargoInicial:      codigoOficioBase(
+          String(e.Codigo_Oficio ?? e.Cod_Profesion ?? ''),
+          String(e.Ccosto ?? e.ccosto ?? ''),
+        ),
         idTiendaInicial:     null,  // No disponible en Midasoft — viene de tabla local
         idCentroCostoInicial:String(e.Ccosto ?? e.ccosto ?? ''),
         nombre:              [

@@ -46,22 +46,38 @@ export class DatatestLoader {
   /**
    * BaseEmpleados_*.txt:
    * codigo; cedula; apellidos; nombres; tipoContrato; fechaIngreso; fechaRetiro;
-   * ccostoLargo; ccostoCorto; jornada; fechaInicioCcosto
+   * oficioCompuesto (oficio+ccosto+000); ccosto; jornada; fechaInicioCcosto
    */
   empleados(): Array<{
     codigo: string; cedula: string; apellidos: string; nombres: string;
-    fechaIngreso: string; fechaRetiro: string; ccosto: string; jornada: string;
+    fechaIngreso: string; fechaRetiro: string; oficioCompuesto: string;
+    ccosto: string; jornada: string;
   }> {
     return this.leerFilas('BaseEmpleados').map((c) => ({
-      codigo:       c[0] ?? '',
-      cedula:       c[1] ?? '',
-      apellidos:    c[2] ?? '',
-      nombres:      c[3] ?? '',
-      fechaIngreso: DatatestLoader.fechaIso(c[5] ?? ''),
-      fechaRetiro:  DatatestLoader.fechaIso(c[6] ?? ''),
-      ccosto:       c[8] ?? '',
-      jornada:      c[9] ?? '',
+      codigo:          c[0] ?? '',
+      cedula:          c[1] ?? '',
+      apellidos:       c[2] ?? '',
+      nombres:         c[3] ?? '',
+      fechaIngreso:    DatatestLoader.fechaIso(c[5] ?? ''),
+      fechaRetiro:     DatatestLoader.fechaIso(c[6] ?? ''),
+      oficioCompuesto: c[7] ?? '',
+      ccosto:          c[8] ?? '',
+      jornada:         c[9] ?? '',
     }));
+  }
+
+  /** Nombres de centro de costo desde las marcaciones ("42062 - 138 TIENDA KOAJ PALATINO"). */
+  nombresCcosto(): Map<string, string> {
+    const nombres = new Map<string, string>();
+    for (const fila of this.leerFilas('MarcacionesComercial')) {
+      const campo = fila[1] ?? '';
+      const sep = campo.indexOf('-');
+      if (sep < 0) continue;
+      const ccosto = campo.slice(0, sep).trim();
+      const nombre = campo.slice(sep + 1).trim();
+      if (ccosto && nombre && !nombres.has(ccosto)) nombres.set(ccosto, nombre);
+    }
+    return nombres;
   }
 
   /** MarcacionesComercial_*.txt: codigo; "ccosto - nombre tienda"; fecha; horas */

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Colaborador } from './entities/colaborador.entity';
 import { Tienda } from './entities/tienda.entity';
 import { MidasoftService } from '../integraciones/midasoft.service';
+import { codigoOficioBase } from '../../common/utils/oficio.util';
 
 export interface TiendaCcosto {
   ccosto: string;
@@ -51,25 +52,28 @@ export class CatalogosService {
 
   /**
    * Tiendas (centros de costo) derivadas del API de empleados Midasoft.
-   * El nombre se enriquece desde el catálogo local `tienda` cuando existe;
-   * si no, se muestra el código del centro de costo.
+   * El nombre PRIMARIO es DescripcionCcosto del propio API
+   * (ej. "070 TIENDA KOAJ TINTAL"); si falta, se enriquece desde el
+   * catálogo local `tienda`, y en último caso se muestra el código.
    */
   async tiendasMidasoft(): Promise<TiendaCcosto[]> {
     const empleados = await this.empleadosApi();
-    const ccostos = new Set<string>();
+    const porCcosto = new Map<string, string>();
     for (const e of empleados) {
       const cc = String(e.Ccosto ?? e.ccosto ?? '').trim();
-      if (cc) ccostos.add(cc);
+      if (!cc) continue;
+      const descripcion = String(e.DescripcionCcosto ?? e.descripcionCcosto ?? '').trim();
+      if (descripcion || !porCcosto.has(cc)) porCcosto.set(cc, descripcion);
     }
 
     const locales = await this.tiendaRepo.find();
-    const nombrePorCodigo = new Map(locales.map((t) => [t.codigo, t.nombre]));
+    const nombreLocal = new Map(locales.map((t) => [t.codigo, t.nombre]));
 
-    return [...ccostos]
-      .sort()
-      .map((ccosto) => ({
+    return [...porCcosto.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([ccosto, descripcion]) => ({
         ccosto,
-        nombre: nombrePorCodigo.get(ccosto) ?? `Centro de costo ${ccosto}`,
+        nombre: descripcion || nombreLocal.get(ccosto) || `Centro de costo ${ccosto}`,
       }));
   }
 
@@ -84,7 +88,9 @@ export class CatalogosService {
     for (const e of empleados) {
       const cc = String(e.Ccosto ?? e.ccosto ?? '').trim();
       if (cc !== ccosto) continue;
-      const codigo = String(e.Codigo_Oficio ?? e.Cod_Profesion ?? '').trim();
+      // El API entrega Codigo_Oficio compuesto (oficio+ccosto+000):
+      // se normaliza al código base de 6 dígitos que usa la HU-02.
+      const codigo = codigoOficioBase(String(e.Codigo_Oficio ?? e.Cod_Profesion ?? ''), cc);
       const nombre = String(e.Oficio ?? '').trim();
       if (codigo) porCodigo.set(codigo, nombre || codigo);
     }
