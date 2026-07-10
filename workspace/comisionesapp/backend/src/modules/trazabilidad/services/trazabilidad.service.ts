@@ -27,6 +27,8 @@ export interface DetalleTrazabilidad {
   idColaborador: string;
   idCargo: string;
   idTienda: string | null;
+  /** Código de tienda del origen (CO de ICG) cuando no hay tienda en catálogo local */
+  codigoTienda: string | null;
   periodoCodigo: string;
   parametrizacion: {
     tipoLiquidacion: string;
@@ -121,6 +123,10 @@ export class TrazabilidadService {
       filtrosDetalle.push('d.id_tienda = :fTienda');
       paramsDetalle.fTienda = filtros.idTienda;
     }
+    if (filtros.codigoTienda) {
+      filtrosDetalle.push('d.codigo_tienda = :fCodTienda');
+      paramsDetalle.fCodTienda = filtros.codigoTienda;
+    }
     if (filtrosDetalle.length) {
       qb.andWhere(
         `EXISTS (SELECT 1 FROM liquidacion_detalle d
@@ -183,9 +189,14 @@ export class TrazabilidadService {
       relations: ['periodo', 'periodo.calendario'],
     });
 
-    const snapshot = liquidacion?.parametrizacionJson
+    // El snapshot es un ARREGLO (una entrada por cargo parametrizado):
+    // se toma la parametrización del cargo del colaborador consultado.
+    const snapshotRaw = liquidacion?.parametrizacionJson
       ? JSON.parse(liquidacion.parametrizacionJson)
       : null;
+    const snapshot = Array.isArray(snapshotRaw)
+      ? snapshotRaw.find((s) => s.codigoOficio === detalles[0].idCargo) ?? snapshotRaw[0] ?? null
+      : snapshotRaw;
 
     const totalBruta  = detalles.reduce((a, d) => a + Number(d.ventaBruta), 0);
     const totalSinIva = detalles.reduce((a, d) => a + Number(d.ventaSinIva), 0);
@@ -212,6 +223,7 @@ export class TrazabilidadService {
       idColaborador,
       idCargo: primerDet.idCargo,
       idTienda: primerDet.idTienda ?? null,
+      codigoTienda: primerDet.codigoTienda ?? null,
       periodoCodigo: liquidacion?.periodo?.codigo ?? '',
       parametrizacion: snapshot ? {
         tipoLiquidacion: snapshot.tipoLiquidacion,
@@ -260,7 +272,7 @@ export class TrazabilidadService {
 
     const SEP = ';';
     const HEADERS = [
-      'id_colaborador', 'id_cargo', 'id_tienda', 'tipo_venta',
+      'id_colaborador', 'id_cargo', 'codigo_tienda', 'tipo_venta',
       'venta_bruta', 'venta_sin_iva', 'comision_bancaria', 'venta_neta',
       'porcentaje_aplicado', 'comision',
       'dias_laborados', 'horas_validas', 'dias_excluidos', 'motivo_exclusion',
@@ -268,7 +280,7 @@ export class TrazabilidadService {
     const lineas = [HEADERS.join(SEP)];
     for (const d of detalles) {
       lineas.push([
-        d.idColaborador, d.idCargo, d.idTienda ?? '',
+        d.idColaborador, d.idCargo, d.codigoTienda ?? d.idTienda ?? '',
         d.tipoVenta,
         d.ventaBruta, d.ventaSinIva, d.comisionBancaria, d.ventaNeta,
         d.porcentajeAplicado, d.comision,

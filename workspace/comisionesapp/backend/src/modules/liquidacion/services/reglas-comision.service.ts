@@ -114,7 +114,7 @@ export class ReglasComisionService {
       detalles.push({
         ...base,
         tipoVenta: TipoVenta.LINEA,
-        ventaBruta: c.porTipo[TipoVenta.LINEA].ventaSinIva,
+        ventaBruta: c.porTipo[TipoVenta.LINEA].ventaBruta,
         ventaSinIva: c.porTipo[TipoVenta.LINEA].ventaSinIva,
         comisionBancaria: c.porTipo[TipoVenta.LINEA].comisionBancaria,
         ventaNeta: ventaNetaPorTipo[TipoVenta.LINEA],
@@ -124,7 +124,7 @@ export class ReglasComisionService {
       detalles.push({
         ...base,
         tipoVenta: TipoVenta.PROMOCION,
-        ventaBruta: c.porTipo[TipoVenta.PROMOCION].ventaSinIva,
+        ventaBruta: c.porTipo[TipoVenta.PROMOCION].ventaBruta,
         ventaSinIva: c.porTipo[TipoVenta.PROMOCION].ventaSinIva,
         comisionBancaria: c.porTipo[TipoVenta.PROMOCION].comisionBancaria,
         ventaNeta: ventaNetaPorTipo[TipoVenta.PROMOCION],
@@ -134,7 +134,7 @@ export class ReglasComisionService {
       detalles.push({
         ...base,
         tipoVenta: TipoVenta.LINEA_ESTRATEGIA,
-        ventaBruta: c.porTipo[TipoVenta.LINEA_ESTRATEGIA].ventaSinIva,
+        ventaBruta: c.porTipo[TipoVenta.LINEA_ESTRATEGIA].ventaBruta,
         ventaSinIva: c.porTipo[TipoVenta.LINEA_ESTRATEGIA].ventaSinIva,
         comisionBancaria: c.porTipo[TipoVenta.LINEA_ESTRATEGIA].comisionBancaria,
         ventaNeta: ventaNetaPorTipo[TipoVenta.LINEA_ESTRATEGIA],
@@ -171,7 +171,7 @@ export class ReglasComisionService {
         detalles.push({
           idColaborador: c.idColaborador, idCargo: param.codigoOficio, idTienda: idTienda,
           tipoVenta: TipoVenta.LINEA,
-          ventaBruta: c.totalSinIva, ventaSinIva: c.totalSinIva,
+          ventaBruta: c.totalBruta, ventaSinIva: c.totalSinIva,
           comisionBancaria: c.totalComBancaria,
           ventaNeta: c.totalSinIva - c.totalComBancaria,
           porcentajeAplicado: param.porcLinea, comision,
@@ -212,7 +212,7 @@ export class ReglasComisionService {
         detalles.push({
           idColaborador: c.idColaborador, idCargo: param.codigoOficio, idTienda: idTienda,
           tipoVenta: TipoVenta.LINEA,
-          ventaBruta: c.totalSinIva, ventaSinIva: c.totalSinIva,
+          ventaBruta: c.totalBruta, ventaSinIva: c.totalSinIva,
           comisionBancaria: c.totalComBancaria,
           ventaNeta: c.totalSinIva - c.totalComBancaria,
           porcentajeAplicado: param.porcLinea, comision,

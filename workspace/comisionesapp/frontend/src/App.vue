@@ -151,11 +151,11 @@ function handleLogout() {
 .sidebar {
   width: 222px;
   flex-shrink: 0;
-  background: #111;
+  background: var(--neutral);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  border-right: 1px solid #1c1c1c;
+  border-right: 1px solid #1e293b;
 }
 
 .sidebar-logo {
@@ -163,7 +163,7 @@ function handleLogout() {
   align-items: center;
   gap: 10px;
   padding: 15px 14px 13px;
-  border-bottom: 1px solid #1f1f1f;
+  border-bottom: 1px solid #1e293b;
   flex-shrink: 0;
 }
 
@@ -171,10 +171,10 @@ function handleLogout() {
   width: 30px;
   height: 30px;
   background: #fff;
-  color: #111;
+  color: var(--neutral);
   font-size: 0.85rem;
   font-weight: 900;
-  border-radius: 5px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,7 +196,7 @@ function handleLogout() {
 
 .logo-sub {
   font-size: 0.63rem;
-  color: #555;
+  color: #64748b;
   font-weight: 400;
 }
 
@@ -212,7 +212,7 @@ function handleLogout() {
 .nav-sect {
   font-size: 0.59rem;
   font-weight: 700;
-  color: #444;
+  color: #475569;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 10px 6px 4px;
@@ -223,8 +223,8 @@ function handleLogout() {
   align-items: center;
   gap: 9px;
   padding: 7px 9px;
-  border-radius: 7px;
-  color: #888;
+  border-radius: 8px;
+  color: #94a3b8;
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 500;
@@ -239,25 +239,25 @@ function handleLogout() {
 
 .nav-item i { font-size: 1rem; flex-shrink: 0; }
 
-.nav-item:hover { background: #1a1a1a; color: #ccc; }
+.nav-item:hover { background: #1e293b; color: #e2e8f0; }
 
 .nav-item.active {
   background: #fff;
-  color: #111;
+  color: var(--neutral);
   font-weight: 700;
 }
 
-.nav-item.active i { color: #111; }
+.nav-item.active i { color: var(--neutral); }
 
 .nav-item.nav-disabled { opacity: 0.4; cursor: default; }
-.nav-item.nav-disabled:hover { background: none; color: #888; }
+.nav-item.nav-disabled:hover { background: none; color: #94a3b8; }
 
 /* Footer */
 .sidebar-footer {
   padding: 11px 14px;
   font-size: 0.63rem;
-  color: #3a3a3a;
-  border-top: 1px solid #1c1c1c;
+  color: #475569;
+  border-top: 1px solid #1e293b;
   flex-shrink: 0;
 }
 
@@ -273,8 +273,8 @@ function handleLogout() {
 /* ── Topbar ──────────────────────────────────────────────────────── */
 .topbar {
   height: 50px;
-  background: #fff;
-  border-bottom: 1px solid #dcdcdc;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -284,8 +284,8 @@ function handleLogout() {
 
 .topbar-title {
   font-size: 0.84rem;
-  font-weight: 700;
-  color: #111;
+  font-weight: 800;
+  color: var(--text);
   flex-shrink: 0;
 }
 
@@ -301,24 +301,24 @@ function handleLogout() {
 
 .user-rol {
   font-size: 0.66rem;
-  border: 1px solid #dcdcdc;
+  border: 1px solid var(--border-strong);
   border-radius: 999px;
   padding: 1px 8px;
-  color: #999;
+  color: var(--tertiary);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.user-name { color: #666; }
+.user-name { color: var(--text-muted); }
 
 .btn-logout {
   background: transparent;
-  border: 1px solid #dcdcdc;
-  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
   padding: 4px 10px;
   font-size: 0.77rem;
-  color: #777;
+  color: var(--tertiary);
   cursor: pointer;
   transition: border-color 0.12s, color 0.12s;
   font-family: inherit;
@@ -327,13 +327,13 @@ function handleLogout() {
   gap: 5px;
 }
 
-.btn-logout:hover { border-color: #111; color: #111; }
+.btn-logout:hover { border-color: var(--neutral); color: var(--neutral); }
 
 /* ── Content ─────────────────────────────────────────────────────── */
 .app-content {
   flex: 1;
   overflow-y: auto;
   padding: 18px 20px;
-  background: #f2f2f2;
+  background: var(--bg);
 }
 </style>

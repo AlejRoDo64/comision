@@ -420,6 +420,7 @@ export interface DetalleTrazabilidad {
   idColaborador: string;
   idCargo: string;
   idTienda: string | null;
+  codigoTienda: string | null;
   periodoCodigo: string;
   parametrizacion: {
     tipoLiquidacion: string;

@@ -25,7 +25,11 @@ export interface VentaNormalizada {
 export interface ColaboradorNormalizado {
   idColaborador: string;
   idTienda: string;
-  porTipo: Record<TipoVenta, { ventaSinIva: number; comisionBancaria: number }>;
+  porTipo: Record<
+    TipoVenta,
+    { ventaBruta: number; ventaSinIva: number; comisionBancaria: number }
+  >;
+  totalBruta: number;
   totalSinIva: number;
   totalComBancaria: number;
 }
@@ -59,15 +63,19 @@ export class NormalizacionService {
           idColaborador: v.idColaborador,
           idTienda: v.idTienda,
           porTipo: {
-            [TipoVenta.LINEA]:            { ventaSinIva: 0, comisionBancaria: 0 },
-            [TipoVenta.LINEA_ESTRATEGIA]: { ventaSinIva: 0, comisionBancaria: 0 },
-            [TipoVenta.PROMOCION]:        { ventaSinIva: 0, comisionBancaria: 0 },
+            [TipoVenta.LINEA]:            { ventaBruta: 0, ventaSinIva: 0, comisionBancaria: 0 },
+            [TipoVenta.LINEA_ESTRATEGIA]: { ventaBruta: 0, ventaSinIva: 0, comisionBancaria: 0 },
+            [TipoVenta.PROMOCION]:        { ventaBruta: 0, ventaSinIva: 0, comisionBancaria: 0 },
           },
+          totalBruta: 0,
           totalSinIva: 0,
           totalComBancaria: 0,
         };
         porColab.set(key, n);
       }
+      // HU-04 exige venta bruta y sin IVA como valores distintos en el detalle
+      n.porTipo[v.tipoVenta].ventaBruta += v.importe;
+      n.totalBruta += v.importe;
       n.porTipo[v.tipoVenta].ventaSinIva += sinIva;
       n.totalSinIva += sinIva;
     }

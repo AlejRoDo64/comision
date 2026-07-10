@@ -55,6 +55,11 @@ export class FiltrosTrazabilidadDto {
   @IsGuid()
   idTienda?: string;
 
+  @ApiPropertyOptional({ description: 'Código de tienda del origen ICG (ej. 42062)' })
+  @IsOptional()
+  @IsString()
+  codigoTienda?: string;
+
   // idGrupo / zona: se añadirán cuando exista la entidad que los soporte;
   // aceptarlos e ignorarlos silenciosamente engaña al consumidor de la API.
 

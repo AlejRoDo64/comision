@@ -690,6 +690,6 @@ onMounted(cargarTodo);
   resize: vertical; width: 100%;
   transition: border-color 0.13s, box-shadow 0.13s;
 }
-.textarea-field:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,.05); }
-.info-box.danger { background: #fff0f0; border-color: #f5c6c6; color: #b91c1c; }
+.textarea-field:focus { border-color: var(--neutral); box-shadow: 0 0 0 3px rgba(15,23,42,.08); }
+/* .info-box.danger vive en el design system (main.css) */
 </style>

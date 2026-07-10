@@ -86,18 +86,18 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f2f2f2;
+  background: var(--bg);
 }
 
 /* ── Card ──────────────────────────────────────────────── */
 .login-card {
-  background: #ffffff;
-  border: 1px solid #dcdcdc;
-  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 2.5rem 2.25rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Brand ─────────────────────────────────────────────── */

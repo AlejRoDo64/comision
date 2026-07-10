@@ -180,16 +180,6 @@ function formatear(v: unknown): string {
 </script>
 
 <style scoped>
+/* .cal-tabs/.cal-tab e .info-box.danger viven en el design system (main.css) */
 .datos-view { display: flex; flex-direction: column; }
-.cal-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-.cal-tab {
-  display: flex; align-items: center; gap: 6px;
-  background: #f5f5f5; border: 1px solid #dcdcdc;
-  border-radius: 8px; padding: 6px 14px;
-  font-size: 0.8rem; font-weight: 600; color: #666;
-  cursor: pointer; font-family: inherit; transition: all 0.12s;
-}
-.cal-tab:hover { border-color: #999; color: #111; }
-.cal-tab.active { background: #111; color: #fff; border-color: #111; }
-.info-box.danger { background: #fff0f0; border-color: #f5c6c6; color: #b91c1c; }
 </style>
