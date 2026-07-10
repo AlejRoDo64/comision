@@ -200,22 +200,23 @@ input:disabled { background: #f5f5f5; cursor: not-allowed; color: #999999; }
   margin-bottom: 0.75rem;
 }
 
-/* ── Submit ────────────────────────────────────────────── */
+/* ── Submit — variante Primary del design system a ancho completo ── */
 .btn-login {
   width: 100%;
-  background: #111111;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
+  background: var(--primary);
+  color: var(--secondary);
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-sm);
   padding: 0.72rem;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   margin-top: 0.25rem;
   letter-spacing: 0.01em;
 }
 
-.btn-login:hover:not(:disabled) { background: #333333; }
+.btn-login:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
 .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

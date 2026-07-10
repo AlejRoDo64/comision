@@ -91,8 +91,9 @@
         <div class="topbar-sep"></div>
         <div class="topbar-user">
           <span class="user-rol">{{ rolLegible }}</span>
-          <span class="user-name">{{ authStore.user?.nombre }}</span>
-          <button class="btn-logout" @click="handleLogout">
+          <!-- Solo se muestra el nombre si NO coincide con el rol (evita verse duplicado) -->
+          <span v-if="nombreVisible" class="user-name">{{ nombreVisible }}</span>
+          <button class="btn sm outlined" @click="handleLogout">
             <i class="ti ti-logout" style="font-size:0.85rem"></i> Salir
           </button>
         </div>
@@ -132,6 +133,13 @@ const ROLES_LEGIBLES: Record<string, string> = {
 const rolLegible = computed(() =>
   authStore.user ? ROLES_LEGIBLES[authStore.user.rol] ?? authStore.user.rol : '',
 );
+
+// Evita mostrar "Profesional de Comisiones" dos veces cuando el nombre del
+// usuario semilla coincide con el nombre legible del rol.
+const nombreVisible = computed(() => {
+  const nombre = authStore.user?.nombre?.trim() ?? '';
+  return nombre.toLowerCase() === rolLegible.value.toLowerCase() ? '' : nombre;
+});
 
 function handleLogout() {
   authStore.logout();
@@ -311,23 +319,7 @@ function handleLogout() {
 }
 
 .user-name { color: var(--text-muted); }
-
-.btn-logout {
-  background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 0.77rem;
-  color: var(--tertiary);
-  cursor: pointer;
-  transition: border-color 0.12s, color 0.12s;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.btn-logout:hover { border-color: var(--neutral); color: var(--neutral); }
+/* El botón "Salir" usa las clases globales .btn sm outlined del design system */
 
 /* ── Content ─────────────────────────────────────────────────────── */
 .app-content {

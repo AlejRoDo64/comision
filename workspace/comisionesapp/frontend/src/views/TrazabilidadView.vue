@@ -114,7 +114,7 @@
               <td style="font-weight:700">${{ r.totalComision.toLocaleString('es-CO') }}</td>
               <td style="font-size:0.74rem">{{ formatFecha(r.fechaInicio) }}</td>
               <td>
-                <button class="btn sm ghost" style="padding:2px 8px" @click="cargarDetalle(r.idLiquidacion)">
+                <button class="btn sm ghost" @click="cargarDetalle(r.idLiquidacion)">
                   <i class="ti ti-eye"></i> Ver colaboradores
                 </button>
               </td>
@@ -128,7 +128,7 @@
     <div v-if="liquidacionDetalle" class="card" style="margin-bottom:14px">
       <div class="card-title" style="justify-content:space-between">
         <span><i class="ti ti-building-store"></i> Detalle por colaboradores — {{ liquidacionDetalle.periodoCodigo }}</span>
-        <button class="btn sm ghost" style="padding:2px 8px" @click="liquidacionDetalle = null">
+        <button class="btn sm ghost" @click="liquidacionDetalle = null">
           <i class="ti ti-x"></i> Cerrar
         </button>
       </div>
@@ -169,7 +169,7 @@
                 <td style="font-weight:700; color:#1a6644">{{ fmt(c.base.comision) }}</td>
               </tr>
               <tr v-if="expandidos.has(c.idColaborador)" class="row-colaborador">
-                <td colspan="9" style="background:#fafafa; padding:12px 16px">
+                <td colspan="9" style="background:var(--surface-2); padding:12px 16px">
                   <div class="g-row g3" style="margin-bottom:8px">
                     <div>
                       <strong>Subperíodo:</strong> {{ c.afectacion.fechaInicioSub }} → {{ c.afectacion.fechaFinSub }}
@@ -178,7 +178,7 @@
                     <div>
                       <strong>Días laborados:</strong> {{ c.base.diasLaborados ?? '—' }}
                       <strong style="margin-left:12px">Días excluidos:</strong> {{ c.base.diasExcluidos ?? '—' }}
-                      <span v-if="c.base.motivoExclusion" class="tag" style="margin-left:6px; background:#fff0f0; color:#b91c1c">
+                      <span v-if="c.base.motivoExclusion" class="status s-err" style="margin-left:6px">
                         {{ c.base.motivoExclusion }}
                       </span>
                     </div>

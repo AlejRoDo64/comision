@@ -90,7 +90,7 @@
                 @click="cerrarLiquidacion">
           <i class="ti ti-lock"></i> Cerrar período
         </button>
-        <span v-if="liquidacionActual.estado === 'CERRADO'" class="tag" style="background:#1a6644; color:#fff">
+        <span v-if="liquidacionActual.estado === 'CERRADO'" class="status s-ok">
           <i class="ti ti-lock"></i> Período cerrado
         </span>
       </div>

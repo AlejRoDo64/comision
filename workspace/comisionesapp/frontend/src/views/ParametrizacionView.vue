@@ -171,7 +171,7 @@
       </div>
 
       <!-- Tablas auxiliares: presupuesto y crecimiento (solo lectura al editar) -->
-      <div v-if="editandoId" class="card" style="background:#fafafa; margin-top:14px">
+      <div v-if="editandoId" class="card" style="background:var(--surface-2); margin-top:14px">
         <div class="card-title"><i class="ti ti-table"></i> Tablas de presupuesto y crecimiento (referencia)</div>
 
         <div class="card-title" style="font-size:0.78rem; margin-top:6px">
@@ -262,7 +262,7 @@
               <td><input v-model="r.hastaRaw" type="number" min="0" step="0.01" placeholder="∞" class="inp-sm" /></td>
               <td><input v-model.number="r.comisionPorc" type="number" min="0" step="0.0001" class="inp-sm" /></td>
               <td>
-                <button class="btn sm danger" style="padding:2px 7px" @click="form.rangos.splice(i, 1)">
+                <button class="btn sm danger icon" @click="form.rangos.splice(i, 1)">
                   <i class="ti ti-trash" style="font-size:0.8rem"></i>
                 </button>
               </td>
@@ -334,13 +334,13 @@
               </td>
               <td>
                 <div class="btn-group">
-                  <button class="btn sm ghost" style="padding:2px 7px" title="Editar" @click="abrirEdicion(p)">
+                  <button class="btn sm ghost icon" title="Editar" @click="abrirEdicion(p)">
                     <i class="ti ti-pencil" style="font-size:0.8rem"></i>
                   </button>
-                  <button v-if="p.estadoActivo" class="btn sm ghost" style="padding:2px 7px" title="Desactivar" @click="desactivar(p)">
+                  <button v-if="p.estadoActivo" class="btn sm ghost icon" title="Desactivar" @click="desactivar(p)">
                     <i class="ti ti-toggle-left" style="font-size:0.8rem"></i>
                   </button>
-                  <button class="btn sm danger" style="padding:2px 7px" title="Eliminar" @click="eliminar(p)">
+                  <button class="btn sm danger icon" title="Eliminar" @click="eliminar(p)">
                     <i class="ti ti-trash" style="font-size:0.8rem"></i>
                   </button>
                 </div>

@@ -128,6 +128,9 @@ tr:hover td { background: var(--surface-2); }
 .btn.sm { padding: 4px 11px; font-size: 0.74rem; }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 .btn.danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+/* Botón de icono: acciones compactas en tablas (editar, eliminar, etc.) */
+.btn.icon { padding: 4px 7px; }
+.btn.icon i { font-size: 0.85rem; }
 .btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
 /* Forms */
