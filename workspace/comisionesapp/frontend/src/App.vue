@@ -8,7 +8,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <span class="logo-mark">C</span>
+        <span class="logo-mark"><i class="ti ti-percentage"></i></span>
         <div class="logo-text">
           <span class="logo-name">Automatización</span>
           <span class="logo-sub">Comisiones · Permoda</span>

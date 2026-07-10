@@ -3,7 +3,7 @@
     <div class="login-card">
 
       <div class="login-brand">
-        <span class="brand-mark">C</span>
+        <span class="brand-mark"><i class="ti ti-percentage"></i></span>
         <div class="brand-text">
           <span class="brand-name">Automatización Comisiones</span>
           <span class="brand-sub">Comisiones · Permoda Ltda.</span>
