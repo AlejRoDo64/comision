@@ -377,15 +377,4 @@ async function ejecutarGenerarAnio() {
 onMounted(cargar);
 </script>
 
-<style scoped>
-/* .cal-tabs/.cal-tab e .info-box.danger viven en el design system (main.css) */
-.cal-view { display: flex; flex-direction: column; }
-
-.cal-tab-del {
-  background: none; border: none; color: inherit;
-  font-size: 1rem; line-height: 1; cursor: pointer;
-  padding: 0 0 0 2px; opacity: 0.5; font-family: inherit;
-}
-.cal-tab-del:hover { opacity: 1; }
-.cal-tab.active .cal-tab-del { color: #fff; }
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->

@@ -287,6 +287,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.liq-view { display: flex; flex-direction: column; }
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->

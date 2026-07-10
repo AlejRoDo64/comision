@@ -676,20 +676,4 @@ function etiquetaEstrategia(p: ParametrizacionCargo) {
 onMounted(cargarTodo);
 </script>
 
-<style scoped>
-.param-view { display: flex; flex-direction: column; }
-.inp-sm {
-  width: 90px; border: 1px solid #ccc; border-radius: 5px;
-  padding: 3px 6px; font-size: 0.8rem; font-family: inherit;
-}
-.sub { display: block; font-size: 0.68rem; color: #999; }
-.textarea-field {
-  border: 1px solid #d8d8d8; border-radius: 7px;
-  padding: 8px 10px; font-size: 0.81rem; color: #111;
-  background: #fff; font-family: inherit; outline: none;
-  resize: vertical; width: 100%;
-  transition: border-color 0.13s, box-shadow 0.13s;
-}
-.textarea-field:focus { border-color: var(--neutral); box-shadow: 0 0 0 3px rgba(15,23,42,.08); }
-/* .info-box.danger vive en el design system (main.css) */
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->

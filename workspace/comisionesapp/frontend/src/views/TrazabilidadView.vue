@@ -359,16 +359,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.traz-view { display: flex; flex-direction: column; }
-.filtros-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-.row-tienda { cursor: pointer; }
-.row-tienda:hover td { background: #f4f4f4; }
-.row-colaborador td { background: #fafafa; }
-.empty-state {
-  text-align: center;
-  padding: 28px 12px;
-  color: #888;
-  font-size: 0.84rem;
-}
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->

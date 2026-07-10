@@ -179,7 +179,4 @@ function formatear(v: unknown): string {
 }
 </script>
 
-<style scoped>
-/* .cal-tabs/.cal-tab e .info-box.danger viven en el design system (main.css) */
-.datos-view { display: flex; flex-direction: column; }
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->

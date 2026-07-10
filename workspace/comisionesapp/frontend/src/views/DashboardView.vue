@@ -116,7 +116,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.dash { display: flex; flex-direction: column; gap: 14px; }
-.quick-links { display: flex; gap: 8px; flex-wrap: wrap; }
-</style>
+<!-- Estilos: design system global en src/assets/main.css -->
