@@ -110,6 +110,7 @@
               <th>Ejecutada por</th>
               <th>Inicio</th>
               <th>Fin</th>
+              <th>Archivo</th>
             </tr>
           </thead>
           <tbody>
@@ -121,6 +122,15 @@
               <td>{{ l.usuarioEjecuta }}</td>
               <td style="font-size:0.74rem">{{ formatFecha(l.fechaInicio) }}</td>
               <td style="font-size:0.74rem">{{ l.fechaFin ? formatFecha(l.fechaFin) : '—' }}</td>
+              <td>
+                <button v-if="l.estado === 'LIQUIDADO' || l.estado === 'CERRADO'"
+                        class="btn sm ghost"
+                        title="Descargar archivo plano de nómina"
+                        @click="descargarPlano(l)">
+                  <i class="ti ti-download"></i> Plano
+                </button>
+                <span v-else>—</span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -252,6 +262,22 @@ async function cargarLiquidaciones() {
     historial.value = await liquidacionApi.getAll();
   } catch {
     /* no fatal */
+  }
+}
+
+/** Descarga el archivo plano de nómina de la liquidación (HU-03). */
+async function descargarPlano(l: Liquidacion) {
+  error.value = '';
+  try {
+    const respuesta = await liquidacionApi.descargarArchivo(l.idLiquidacion);
+    const url = URL.createObjectURL(new Blob([respuesta.data], { type: 'text/plain' }));
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = `plano_${l.periodo?.codigo ?? l.idLiquidacion}.txt`;
+    enlace.click();
+    URL.revokeObjectURL(url);
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'No fue posible descargar el archivo plano.');
   }
 }
 

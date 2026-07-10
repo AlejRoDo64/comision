@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, LessThan, Repository } from 'typeorm';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import { Liquidacion, EstadoLiquidacion } from '../entities/liquidacion.entity';
 import { LiquidacionDetalle, TipoVenta } from '../entities/liquidacion-detalle.entity';
@@ -19,6 +19,7 @@ import { ParametrizacionCargo } from '../../parametrizacion/entities/parametriza
 import { NormalizacionService, VentaBruta } from './normalizacion.service';
 import { SubPeriodoService } from './subperiodo.service';
 import { ReglasComisionService, ResultadoRegla } from './reglas-comision.service';
+import { Marcacion, Novedad } from './afectaciones.service';
 import { ArchivoPlanoService } from './archivo-plano.service';
 import { LiquidacionLockService } from './liquidacion-lock.service';
 import { IndicadoresService } from '../../integraciones/indicadores.service';
@@ -223,11 +224,14 @@ export class LiquidacionService implements OnApplicationBootstrap {
       await this.logDirecto(liquidacion.idLiquidacion, 'NORMALIZACION', NivelLog.OK,
         `${colabNorm.length} colaboradores normalizados`, null, t2 - t1);
 
-      // 5) Consumir empleados / novedades / marcaciones / cambios de Midasoft
-      const [empleados, novPorColab, marPorColab, cambios] = await Promise.all([
-        this.consumirEmpleadosMidasoft(periodo),
-        this.consumirNovedadesMidasoft(periodo),
-        this.consumirMarcacionesMidasoft(periodo),
+      // 5) Consumir empleados / novedades / marcaciones / cambios de Midasoft.
+      // Los empleados van primero: aportan la correlación código Midasoft → cédula
+      // con la que se indexan novedades y marcaciones (ICG identifica por cédula).
+      const empleados = await this.consumirEmpleadosMidasoft(periodo);
+      const cedulaPorCodigo = new Map(empleados.map((e) => [e.idMidasoft, e.idColaborador]));
+      const [novPorColab, marPorColab, cambios] = await Promise.all([
+        this.consumirNovedadesMidasoft(cedulaPorCodigo),
+        this.consumirMarcacionesMidasoft(cedulaPorCodigo),
         this.cambioRepo.find({ where: { idPeriodo: input.idPeriodo } }),
       ]);
       await this.logDirecto(liquidacion.idLiquidacion, 'CONSUMO_MIDASOFT', NivelLog.OK,
@@ -295,8 +299,10 @@ export class LiquidacionService implements OnApplicationBootstrap {
       // 8-11) Persistencia, cierre de la liquidación y cambio de estado del
       // período en UNA sola transacción (HU-03: rollback total ante fallo).
       const parametrizacionParaArchivo = parametrizaciones[0];   // cabecera representativa
+      // HU-03: EMPLEADO del plano = código Midasoft, no la cédula
+      const codigoPorCedula = new Map(empleados.map((e) => [e.idColaborador, e.idMidasoft]));
       const contenido = this.archivoPlano.generar(
-        liquidacion.idLiquidacion, detallesLiquidables, parametrizacionParaArchivo,
+        liquidacion.idLiquidacion, detallesLiquidables, parametrizacionParaArchivo, codigoPorCedula,
       );
       const totalComision = detallesLiquidables.reduce((acc, d) => acc + d.comision, 0);
       const colabUnicos = new Set(detallesLiquidables.map((d) => d.idColaborador));
@@ -529,13 +535,22 @@ export class LiquidacionService implements OnApplicationBootstrap {
     const rows = await this.indicadores.comisionesResumen(
       periodo.fechaInicio, periodo.fechaFin,
     );
-    // TotalImporte es la suma neta de los tres tipos de venta.
-    // Se usa como proxy del total transado; la com. bancaria real se obtiene
-    // del sistema de pagos externo (no expuesto por ICG).
-    return rows.reduce(
-      (acc, r: any) => acc + Number(r.TotalImporte ?? r.TOTALIMPORTE ?? 0),
+    // Se descuenta ÚNICAMENTE la columna ComisionBancaria. Usar TotalImporte
+    // como proxy (venta total) destruye el cálculo: la venta neta del tipo
+    // mayor queda negativa y todas las comisiones dan $0.
+    const total = rows.reduce(
+      (acc, r: any) =>
+        acc + Number(r.ComisionBancaria ?? r.COMISIONBANCARIA ?? r.comisionBancaria ?? 0),
       0,
     );
+    if (rows.length && total === 0) {
+      // TODO conexión real: cuando el SP/fuente de pagos exponga la comisión
+      // bancaria por centro de costo, mapear aquí la columna correspondiente.
+      this.logger.warn(
+        'comisionesResumen no trae columna ComisionBancaria — se liquida sin descuento bancario.',
+      );
+    }
+    return total;
   }
 
   /**
@@ -590,22 +605,58 @@ export class LiquidacionService implements OnApplicationBootstrap {
   }
 
   /**
-   * Novedades por colaborador. Midasoft no expone endpoint público en HU-0223;
-   * si existe en el futuro, mapear aquí. Mientras tanto, Map vacío.
+   * Novedades por colaborador (indexadas por CÉDULA para cruzar con ICG).
+   * En modo real, MidasoftService.novedades() devuelve [] hasta que exista
+   * el endpoint; en modo mock llegan las de Datatest/.
    */
-  private async consumirNovedadesMidasoft(_periodo: Periodo): Promise<Map<string, any[]>> {
-    // TODO HU-03 Fase 7: cuando Midasoft exponga endpoint de novedades,
-    // mapear aquí el resultado. Por ahora retorna Map vacío (sin exclusiones).
-    return new Map<string, any[]>();
+  private async consumirNovedadesMidasoft(
+    cedulaPorCodigo: Map<string, string>,
+  ): Promise<Map<string, Novedad[]>> {
+    const rows = await this.midasoft.novedades();
+    const porColab = new Map<string, Novedad[]>();
+    for (const r of rows) {
+      const cedula = cedulaPorCodigo.get(String(r.Empleado ?? '')) ?? String(r.Empleado ?? '');
+      if (!cedula) continue;
+      const nov: Novedad = {
+        idColaborador: cedula,
+        fechaInicio: String(r.Fecha_Inicio ?? '').slice(0, 10),
+        fechaFin:    String(r.Fecha_Fin ?? '').slice(0, 10),
+        tipo:        this.normalizarTipoNovedad(String(r.Tipo ?? '')),
+        horasPorDia: Number(r.Horas ?? 0) || undefined,
+      };
+      (porColab.get(cedula) ?? porColab.set(cedula, []).get(cedula)!).push(nov);
+    }
+    return porColab;
   }
 
-  /**
-   * Marcaciones por colaborador. Mismo caso: endpoint no documentado.
-   */
-  private async consumirMarcacionesMidasoft(_periodo: Periodo): Promise<Map<string, any[]>> {
-    // TODO HU-03 Fase 7: cuando Midasoft exponga endpoint de marcaciones,
-    // mapear aquí el resultado. Por ahora retorna Map vacío.
-    return new Map<string, any[]>();
+  /** Marcaciones por colaborador (indexadas por CÉDULA). Mismo esquema que novedades. */
+  private async consumirMarcacionesMidasoft(
+    cedulaPorCodigo: Map<string, string>,
+  ): Promise<Map<string, Marcacion[]>> {
+    const rows = await this.midasoft.marcaciones();
+    const porColab = new Map<string, Marcacion[]>();
+    for (const r of rows) {
+      const cedula = cedulaPorCodigo.get(String(r.Empleado ?? '')) ?? String(r.Empleado ?? '');
+      if (!cedula) continue;
+      const marca: Marcacion = {
+        idColaborador:  cedula,
+        fecha:          String(r.Fecha ?? '').slice(0, 10),
+        horasLaboradas: Number(r.Horas ?? 0),
+      };
+      (porColab.get(cedula) ?? porColab.set(cedula, []).get(cedula)!).push(marca);
+    }
+    return porColab;
+  }
+
+  /** Tipos de novedad del origen → tipos que entiende AfectacionesService (HU-03). */
+  private normalizarTipoNovedad(raw: string): string {
+    const t = raw.toUpperCase();
+    if (t === 'IN' || t.includes('INCAPACIDAD')) return 'Incapacidad';
+    if (t.includes('LUTO'))                      return 'LicenciaLuto';
+    if (t.includes('FAMILIA'))                   return 'DiaFamilia';
+    if (t.includes('COMPENSATORIO'))             return 'Compensatorio';
+    if (t.includes('VACACION'))                  return 'Vacaciones';
+    return 'Ausentismo';
   }
 
   /**
@@ -630,6 +681,26 @@ export class LiquidacionService implements OnApplicationBootstrap {
     const absoluta = join(process.cwd(), ruta);
     await mkdir(dirname(absoluta), { recursive: true });
     await writeFile(absoluta, contenido, 'utf8');
+  }
+
+  /** Contenido del archivo plano para descarga (HU-03). */
+  async obtenerArchivoPlano(id: string): Promise<{ nombre: string; contenido: string }> {
+    const liq = await this.liqRepo.findOne({
+      where: { idLiquidacion: id },
+      relations: ['periodo'],
+    });
+    if (!liq) throw new NotFoundException(`Liquidación ${id} no encontrada`);
+    if (!liq.archivoPlanoPath) {
+      throw new NotFoundException('La liquidación no tiene archivo plano generado.');
+    }
+    try {
+      const contenido = await readFile(join(process.cwd(), liq.archivoPlanoPath), 'utf8');
+      return { nombre: `plano_${liq.periodo?.codigo ?? liq.idLiquidacion}.txt`, contenido };
+    } catch {
+      throw new NotFoundException(
+        'El archivo plano no está disponible en el servidor; vuelva a ejecutar la liquidación.',
+      );
+    }
   }
 
   // ── Logging helpers ──────────────────────────────────────────────

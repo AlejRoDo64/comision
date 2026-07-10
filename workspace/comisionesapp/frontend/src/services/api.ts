@@ -367,6 +367,9 @@ export const liquidacionApi = {
     api.post<Liquidacion>('/liquidacion/ejecutar', { idPeriodo }).then((r) => r.data),
   cerrar: (id: string) =>
     api.patch<Liquidacion>(`/liquidacion/${id}/cerrar`, {}).then((r) => r.data),
+  /** Descarga el archivo plano de nómina (HU-03) como blob. */
+  descargarArchivo: (id: string) =>
+    api.get<Blob>(`/liquidacion/${id}/archivo`, { responseType: 'blob' }),
 };
 
 // ── Trazabilidad (HU-04) ──────────────────────────────────────────

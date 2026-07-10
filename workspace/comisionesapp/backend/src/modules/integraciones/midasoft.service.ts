@@ -88,4 +88,21 @@ export class MidasoftService {
     }
     return res.json();
   }
+
+  /**
+   * Novedades del personal. Midasoft aún NO expone este endpoint (HU-03):
+   * cuando exista, autenticar y consumir aquí igual que empleados().
+   * Forma esperada de cada fila: { Empleado, Fecha_Inicio, Fecha_Fin, Horas, Tipo }.
+   */
+  async novedades(): Promise<any[]> {
+    return [];
+  }
+
+  /**
+   * Marcaciones (horas laboradas por día). Endpoint pendiente en Midasoft:
+   * cuando exista, consumir aquí. Forma esperada: { Empleado, Ccosto, Fecha, Horas }.
+   */
+  async marcaciones(): Promise<any[]> {
+    return [];
+  }
 }

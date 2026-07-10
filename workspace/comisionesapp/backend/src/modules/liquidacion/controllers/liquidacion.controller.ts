@@ -2,11 +2,14 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { LiquidacionService } from '../services/liquidacion.service';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
@@ -75,5 +78,17 @@ export class LiquidacionController {
   @ApiOperation({ summary: 'Obtener detalle completo de una liquidación' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.svc.findOne(id);
+  }
+
+  @Get(':id/archivo')
+  @ApiOperation({ summary: 'Descargar el archivo plano de nómina de la liquidación (HU-03)' })
+  @Header('Content-Type', 'text/plain; charset=utf-8')
+  async archivo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<string> {
+    const { nombre, contenido } = await this.svc.obtenerArchivoPlano(id);
+    res.setHeader('Content-Disposition', `attachment; filename="${nombre}"`);
+    return contenido;
   }
 }
