@@ -58,7 +58,9 @@
           <i class="ti ti-file-analytics"></i>
           <span>Trazabilidad y salida</span>
         </RouterLink>
+        <!-- Fuentes externas y opciones de sistema: solo Administrador -->
         <RouterLink
+          v-if="authStore.esAdministrador"
           to="/datos"
           class="nav-item"
           :class="{ active: route.path.startsWith('/datos') }"
@@ -67,16 +69,18 @@
           <span>Datos de origen</span>
         </RouterLink>
 
-        <span class="nav-sect" style="margin-top:8px">Sistema</span>
+        <template v-if="authStore.esAdministrador">
+          <span class="nav-sect" style="margin-top:8px">Sistema</span>
 
-        <div class="nav-item nav-disabled">
-          <i class="ti ti-users"></i>
-          <span>Usuarios y roles</span>
-        </div>
-        <div class="nav-item nav-disabled">
-          <i class="ti ti-shield-check"></i>
-          <span>Auditoría</span>
-        </div>
+          <div class="nav-item nav-disabled">
+            <i class="ti ti-users"></i>
+            <span>Usuarios y roles</span>
+          </div>
+          <div class="nav-item nav-disabled">
+            <i class="ti ti-shield-check"></i>
+            <span>Auditoría</span>
+          </div>
+        </template>
       </nav>
 
       <div class="sidebar-footer">

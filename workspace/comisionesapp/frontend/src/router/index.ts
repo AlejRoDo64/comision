@@ -43,7 +43,8 @@ const router = createRouter({
       path: '/datos',
       name: 'datos',
       component: () => import('@/views/DatosView.vue'),
-      meta: { title: 'Datos de origen' },
+      // Fuentes externas: solo el Administrador puede consultarlas
+      meta: { title: 'Datos de origen', roles: ['ADMINISTRADOR'] },
     },
   ],
 });
@@ -56,6 +57,12 @@ router.beforeEach(async (to, _from, next) => {
   const esPublica = to.meta.public === true;
   if (!esPublica && !auth.isAuthenticated) return next('/login');
   if (to.path === '/login' && auth.isAuthenticated) return next('/');
+
+  // Rutas restringidas por rol (meta.roles) — navegación directa incluida
+  const rolesRuta = to.meta.roles as string[] | undefined;
+  if (rolesRuta?.length && !rolesRuta.includes(auth.user?.rol ?? '')) {
+    return next('/');
+  }
   next();
 });
 

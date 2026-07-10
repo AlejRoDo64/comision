@@ -3,9 +3,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IndicadoresService } from './indicadores.service';
 import { MidasoftService } from './midasoft.service';
 import { RangoFechasQueryDto } from './dto/rango-fechas-query.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
 
+/**
+ * Consulta directa a las fuentes externas (módulo "Datos de origen").
+ * Restringido a ADMINISTRADOR: el motor de liquidación consume los
+ * servicios internamente, no estos endpoints HTTP.
+ */
 @ApiTags('Integraciones (solo lectura)')
 @ApiBearerAuth()
+@Roles('ADMINISTRADOR')
 @Controller('integraciones')
 export class IntegracionesController {
   constructor(
