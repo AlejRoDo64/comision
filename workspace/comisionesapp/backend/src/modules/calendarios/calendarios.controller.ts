@@ -106,9 +106,11 @@ export class CalendariosController {
     return this.svc.updatePeriodo(id, dto, user?.email ?? 'sistema');
   }
 
+  // HU-01: el actor del módulo es el responsable de Compensaciones; la
+  // protección real es por datos (solo Abierto y sin liquidaciones asociadas).
   @Delete('periodos/:id')
-  @Roles('ADMINISTRADOR')
-  @ApiOperation({ summary: 'Eliminar período (solo si está Abierto)' })
+  @Roles('ADMINISTRADOR', 'PROFESIONAL_COMISIONES')
+  @ApiOperation({ summary: 'Eliminar período (solo si está Abierto y sin liquidaciones)' })
   removePeriodo(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.svc.removePeriodo(id, user?.email ?? 'sistema');
   }

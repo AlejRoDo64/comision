@@ -191,6 +191,8 @@
       </div>
     </div>
 
+    <!-- Pop-up de reconfirmación para eliminaciones -->
+    <ConfirmarEliminacion ref="dialogoEliminar" />
   </div>
 </template>
 
@@ -204,6 +206,9 @@ import {
   obtenerMensajeError,
 } from '@/services/api';
 import { clsEstado } from '@/utils/formato';
+import ConfirmarEliminacion from '@/components/ConfirmarEliminacion.vue';
+
+const dialogoEliminar = ref<InstanceType<typeof ConfirmarEliminacion> | null>(null);
 
 const cargando     = ref(false);
 const error        = ref('');
@@ -286,7 +291,11 @@ async function guardarCalendario() {
 }
 
 async function eliminarCalendario(cal: Calendario) {
-  if (!confirm(`¿Eliminar el calendario "${cal.nombre}"? Esta acción no se puede deshacer.`)) return;
+  const confirmado = await dialogoEliminar.value?.abrir({
+    titulo: 'Eliminar calendario',
+    mensaje: `Se eliminará el calendario "${cal.nombre}" (${cal.anio}). Solo es posible si no tiene períodos asociados.`,
+  });
+  if (!confirmado) return;
   error.value = '';
   try {
     await calendariosApi.remove(cal.idCalendario);
@@ -321,7 +330,11 @@ async function guardarPeriodo() {
 }
 
 async function eliminarPeriodo(p: Periodo) {
-  if (!confirm(`¿Eliminar el período "${p.codigo}"?`)) return;
+  const confirmado = await dialogoEliminar.value?.abrir({
+    titulo: 'Eliminar período',
+    mensaje: `Se eliminará el período "${p.codigo}" (${p.fechaInicio} → ${p.fechaFin}). Solo es posible en estado Abierto y sin liquidaciones asociadas.`,
+  });
+  if (!confirmado) return;
   error.value = '';
   try {
     await periodosApi.remove(p.idPeriodo);

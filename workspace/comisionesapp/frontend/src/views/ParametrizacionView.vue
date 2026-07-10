@@ -351,11 +351,14 @@
       </div>
     </div>
 
+    <!-- Pop-up de reconfirmación para eliminaciones -->
+    <ConfirmarEliminacion ref="dialogoEliminar" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import ConfirmarEliminacion from '@/components/ConfirmarEliminacion.vue';
 import {
   calendariosApi,
   periodosApi,
@@ -377,6 +380,7 @@ import {
 } from '@/services/api';
 import { formatearMoneda } from '@/utils/formato';
 
+const dialogoEliminar = ref<InstanceType<typeof ConfirmarEliminacion> | null>(null);
 const cargando  = ref(false);
 const guardando = ref(false);
 const error     = ref('');
@@ -615,7 +619,11 @@ async function desactivar(p: ParametrizacionCargo) {
 }
 
 async function eliminar(p: ParametrizacionCargo) {
-  if (!confirm(`¿Eliminar definitivamente la parametrización de ${p.nombreCargo} — ${p.periodo?.codigo}? Solo para configuraciones creadas por error.`)) return;
+  const confirmado = await dialogoEliminar.value?.abrir({
+    titulo: 'Eliminar parametrización',
+    mensaje: `Se eliminará definitivamente la parametrización de ${p.nombreCargo} — ${p.periodo?.codigo}. Solo para configuraciones creadas por error; si ya se usó, desactívela en su lugar.`,
+  });
+  if (!confirmado) return;
   try {
     await parametrizacionApi.remove(p.idParametrizacion);
     await cargarParametrizaciones();
