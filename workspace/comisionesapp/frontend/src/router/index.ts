@@ -10,10 +10,10 @@ const router = createRouter({
       meta: { public: true, title: 'Iniciar sesión' },
     },
     {
+      // Sin pantalla de inicio propia (no contemplada en las HU):
+      // la raíz lleva al primer módulo del flujo, Calendarios (HU-01).
       path: '/',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
-      meta: { title: 'Resumen general' },
+      redirect: '/calendarios',
     },
     {
       path: '/calendarios',

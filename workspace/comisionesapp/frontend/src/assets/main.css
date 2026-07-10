@@ -330,11 +330,9 @@ tr:hover td { background: var(--surface-2); }
 .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Contenedores raíz de vistas ──────────────────────────────────── */
-.dash { display: flex; flex-direction: column; gap: 14px; }
 .cal-view, .datos-view, .liq-view, .param-view, .traz-view {
   display: flex; flex-direction: column;
 }
-.quick-links { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ── Calendarios ──────────────────────────────────────────────────── */
 .cal-tab-del {

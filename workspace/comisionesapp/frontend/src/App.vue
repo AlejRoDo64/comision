@@ -19,14 +19,6 @@
         <span class="nav-sect">Módulos</span>
 
         <RouterLink
-          to="/"
-          class="nav-item"
-          :class="{ active: route.path === '/' }"
-        >
-          <i class="ti ti-layout-dashboard"></i>
-          <span>Resumen general</span>
-        </RouterLink>
-        <RouterLink
           to="/calendarios"
           class="nav-item"
           :class="{ active: route.path.startsWith('/calendarios') }"
