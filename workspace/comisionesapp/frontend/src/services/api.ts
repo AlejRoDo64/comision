@@ -389,6 +389,23 @@ export const colaboradoresApi = {
   getAll: () => api.get<Colaborador[]>('/catalogos/colaboradores').then((r) => r.data),
 };
 
+// ── Catálogos derivados del API Midasoft (tienda → cargos) ────────
+export interface TiendaCcosto {
+  ccosto: string;
+  nombre: string;
+}
+
+export interface CargoTienda {
+  codigo: string;
+  nombre: string;
+}
+
+export const catalogosApi = {
+  tiendas: () => api.get<TiendaCcosto[]>('/catalogos/tiendas').then((r) => r.data),
+  cargosPorTienda: (ccosto: string) =>
+    api.get<CargoTienda[]>(`/catalogos/cargos-por-tienda/${ccosto}`).then((r) => r.data),
+};
+
 export interface FiltrosTrazabilidad {
   idCalendario?: string;
   anio?: number;

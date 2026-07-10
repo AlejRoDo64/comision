@@ -59,14 +59,35 @@
         {{ editandoId ? 'Editar parametrización' : 'Nueva parametrización' }}
       </div>
 
-      <div class="form-row fc3">
+      <!-- HU-02 (ajuste): primero la tienda; el cargo se vincula por su
+           centro de costo, recuperado del API de empleados Midasoft -->
+      <div class="form-row fc2">
         <div class="field">
-          <label>Cargo (Midasoft) *</label>
-          <select v-model="form.codigoOficio" @change="onCargoSeleccionado">
-            <option value="">Seleccionar...</option>
-            <option v-for="c in cargos" :key="c.codigo" :value="c.codigo">{{ c.codigo }} — {{ c.nombre }}</option>
+          <label>Tienda (centro de costo) *</label>
+          <select v-model="formTienda" @change="onTiendaSeleccionada">
+            <option value="">Seleccionar tienda...</option>
+            <option v-for="t in tiendasCcosto" :key="t.ccosto" :value="t.ccosto">
+              {{ t.ccosto }} — {{ t.nombre }}
+            </option>
           </select>
         </div>
+        <div class="field">
+          <label>Cargo (Midasoft) *</label>
+          <select
+            v-model="form.codigoOficio"
+            :disabled="!formTienda && !editandoId"
+            @change="onCargoSeleccionado"
+          >
+            <option value="">
+              {{ formTienda || editandoId ? 'Seleccionar...' : 'Seleccione primero la tienda' }}
+            </option>
+            <option v-for="c in cargosDisponibles" :key="c.codigo" :value="c.codigo">
+              {{ c.codigo }} — {{ c.nombre }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row fc2">
         <div class="field">
           <label>Calendario *</label>
           <select v-model="formCalendario" @change="onFormCalendario">
@@ -363,6 +384,9 @@ import {
   calendariosApi,
   periodosApi,
   parametrizacionApi,
+  catalogosApi,
+  type TiendaCcosto,
+  type CargoTienda,
   presupuestosApi,
   presupuestoRangosApi,
   crecimientoRangosApi,
@@ -390,6 +414,11 @@ const calendarios       = ref<Calendario[]>([]);
 const periodosFiltro    = ref<Periodo[]>([]);
 const periodosForm      = ref<Periodo[]>([]);
 const parametrizaciones = ref<ParametrizacionCargo[]>([]);
+
+// Flujo tienda → cargo (HU-02): tiendas por centro de costo desde el API
+const tiendasCcosto = ref<TiendaCcosto[]>([]);
+const cargosTienda  = ref<CargoTienda[]>([]);
+const formTienda    = ref('');
 
 const filtroCalendario = ref('');
 const filtroPeriodo    = ref('');
@@ -454,15 +483,34 @@ async function cargarTodo() {
   cargando.value = true;
   error.value = '';
   try {
-    [cargos.value, calendarios.value] = await Promise.all([
+    [cargos.value, calendarios.value, tiendasCcosto.value] = await Promise.all([
       parametrizacionApi.catalogoCargos(),
       calendariosApi.getAll(),
+      catalogosApi.tiendas().catch(() => []),   // si Midasoft no responde, el filtro general sigue operando
     ]);
     await cargarParametrizaciones();
   } catch {
     error.value = 'Error al cargar datos. Verifique la conexión con el servidor.';
   } finally {
     cargando.value = false;
+  }
+}
+
+/** Cargos mostrados en el formulario: los del CCosto de la tienda elegida
+ *  (API Midasoft); al editar sin tienda seleccionada, el catálogo completo
+ *  para que el valor guardado se visualice. */
+const cargosDisponibles = computed<CargoTienda[]>(() =>
+  formTienda.value ? cargosTienda.value : (editandoId.value ? cargos.value : []),
+);
+
+async function onTiendaSeleccionada() {
+  form.value.codigoOficio = '';
+  cargosTienda.value = [];
+  if (!formTienda.value) return;
+  try {
+    cargosTienda.value = await catalogosApi.cargosPorTienda(formTienda.value);
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'No fue posible obtener los cargos de la tienda.');
   }
 }
 
@@ -505,6 +553,8 @@ function abrirNueva() {
   form.value = formVacio();
   formCalendario.value = '';
   periodosForm.value = [];
+  formTienda.value = '';
+  cargosTienda.value = [];
   mostrarForm.value = true;
 }
 
@@ -516,6 +566,9 @@ function onCargoSeleccionado() {
 
 async function abrirEdicion(p: ParametrizacionCargo) {
   editandoId.value = p.idParametrizacion;
+  // Al editar no se exige tienda: el cargo guardado se muestra desde el catálogo
+  formTienda.value = '';
+  cargosTienda.value = [];
   formCalendario.value = p.periodo?.calendario?.idCalendario ?? '';
   if (formCalendario.value) {
     periodosForm.value = await periodosApi.getByCalendario(formCalendario.value);
