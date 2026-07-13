@@ -24,20 +24,23 @@ const modoFuente = (cfg: ConfigService, especifica: string): string =>
   controllers: [IntegracionesController],
   providers: [
     {
-      provide: IndicadoresService,
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) =>
-        modoFuente(cfg, 'INDICADORES_MODO') === 'mock'
-          ? new IndicadoresMockService(cfg)
-          : new IndicadoresService(cfg),
-    },
-    {
       provide: MidasoftService,
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) =>
         modoFuente(cfg, 'MIDASOFT_MODO') === 'mock'
           ? new MidasoftMockService(cfg)
           : new MidasoftService(cfg),
+    },
+    {
+      // Las ventas simuladas se generan para los empleados de la fuente
+      // Midasoft ACTIVA (real o mock): así las consultas y la liquidación
+      // siempre cruzan con los mismos colaboradores que muestra la app.
+      provide: IndicadoresService,
+      inject: [ConfigService, MidasoftService],
+      useFactory: (cfg: ConfigService, midasoft: MidasoftService) =>
+        modoFuente(cfg, 'INDICADORES_MODO') === 'mock'
+          ? new IndicadoresMockService(cfg, midasoft)
+          : new IndicadoresService(cfg),
     },
   ],
   exports: [IndicadoresService, MidasoftService],

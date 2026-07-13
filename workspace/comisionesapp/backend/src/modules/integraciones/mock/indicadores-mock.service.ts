@@ -2,11 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatatestLoader } from './datatest-loader';
 
+/** Fuente de vendedores para generar las ventas simuladas. */
+interface FuenteEmpleados {
+  empleados(): Promise<any[]>;
+}
+
 /**
- * Implementación de prueba de IndicadoresService (FUENTES_MODO=mock).
- * Genera ventas POS deterministas (misma entrada → mismas ventas) para los
- * empleados de Datatest/ dentro del rango de fechas solicitado, con la MISMA
- * forma de columnas que los SP reales (Cedula, CO, LineaICG, Importe...).
+ * Implementación de prueba de IndicadoresService (INDICADORES_MODO=mock).
+ * Genera ventas POS deterministas (misma entrada → mismas ventas) dentro del
+ * rango de fechas solicitado, con la MISMA forma de columnas que los SP
+ * reales (Cedula, CO, LineaICG, Importe...).
+ *
+ * Los vendedores salen de la FUENTE DE EMPLEADOS ACTIVA (API Midasoft real o
+ * mock), de modo que las ventas siempre cruzan con los empleados que muestra
+ * la aplicación; si la fuente falla, cae a los archivos de Datatest/.
  *
  * comisionesResumen incluye la columna ComisionBancaria (~1.5% de la venta),
  * que es la que el motor descuenta — igual que deberá exponer la fuente real.
@@ -18,15 +27,39 @@ export class IndicadoresMockService {
 
   private static readonly LINEAS = ['LÍNEA', 'LÍNEA ESTRATEGIA', 'PROMOCIÓN'];
 
-  constructor(cfg: ConfigService) {
+  constructor(
+    cfg: ConfigService,
+    private readonly fuenteEmpleados?: FuenteEmpleados,
+  ) {
     this.datos = new DatatestLoader(
       DatatestLoader.resolverDirectorio(cfg.get<string>('DATATEST_DIR')),
     );
-    this.logger.warn('FUENTES_MODO=mock — ventas ICG simuladas (deterministas) desde Datatest/');
+    this.logger.warn(
+      'INDICADORES_MODO=mock — ventas ICG simuladas a partir de la fuente de empleados activa',
+    );
+  }
+
+  /** Vendedores (cédula + ccosto) desde la fuente de empleados activa. */
+  private async vendedores(): Promise<Array<{ cedula: string; ccosto: string }>> {
+    if (this.fuenteEmpleados) {
+      try {
+        const api = await this.fuenteEmpleados.empleados();
+        const lista = api
+          .map((e: any) => ({
+            cedula: String(e.Docto_Ident ?? '').trim(),
+            ccosto: String(e.Ccosto ?? '').trim(),
+          }))
+          .filter((e) => e.cedula && e.ccosto);
+        if (lista.length) return lista;
+      } catch {
+        this.logger.warn('Fuente de empleados no disponible — usando Datatest/ como respaldo');
+      }
+    }
+    return this.datos.empleados().map((e) => ({ cedula: e.cedula, ccosto: e.ccosto }));
   }
 
   async comisionesDetalle(fechaInicial: string, fechaFinal: string): Promise<any[]> {
-    const empleados = this.datos.empleados();
+    const empleados = await this.vendedores();
     const filas: any[] = [];
 
     for (const e of empleados) {
