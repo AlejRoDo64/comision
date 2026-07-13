@@ -120,8 +120,8 @@
               <td>{{ l.totalColaboradores ?? '—' }}</td>
               <td>{{ l.totalComision != null ? '$' + l.totalComision.toLocaleString('es-CO') : '—' }}</td>
               <td>{{ l.usuarioEjecuta }}</td>
-              <td style="font-size:0.74rem">{{ formatFecha(l.fechaInicio) }}</td>
-              <td style="font-size:0.74rem">{{ l.fechaFin ? formatFecha(l.fechaFin) : '—' }}</td>
+              <td style="font-size:0.85rem">{{ formatFecha(l.fechaInicio) }}</td>
+              <td style="font-size:0.85rem">{{ l.fechaFin ? formatFecha(l.fechaFin) : '—' }}</td>
               <td>
                 <button v-if="l.estado === 'LIQUIDADO' || l.estado === 'CERRADO'"
                         class="btn sm ghost"

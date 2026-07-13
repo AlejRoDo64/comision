@@ -24,11 +24,7 @@
 
     <div class="info-box">
       <i class="ti ti-lock"></i>
-      <span>
-        Esta vista es de <strong>solo lectura</strong> sobre liquidaciones
-        <em>LIQUIDADO</em> o <em>CERRADO</em>. Cada consulta queda registrada en
-        la bitácora de auditoría.
-      </span>
+      <span>Consulta de <strong>solo lectura</strong> de las liquidaciones ya realizadas.</span>
     </div>
 
     <!-- Filtros -->
@@ -65,8 +61,8 @@
       </div>
       <div class="form-row fc3">
         <div class="field">
-          <label>Cargo (Midasoft)</label>
-          <input v-model="filtros.codigoOficio" :disabled="cargando" placeholder="ej. 104608" />
+          <label>Cargo (código)</label>
+          <input v-model="filtros.codigoOficio" :disabled="cargando" />
         </div>
         <div class="field">
           <label>Comisión mínima</label>
@@ -89,7 +85,7 @@
       <div v-if="!cargando && !resumen.length" class="empty-state">
         <i class="ti ti-database-off" style="font-size:2rem; color:#ccc; display:block; margin-bottom:8px"></i>
         <p>No hay liquidaciones que coincidan con los filtros aplicados.</p>
-        <p style="font-size:0.74rem">Las liquidaciones en estado <strong>LIQUIDADO</strong> o <strong>CERRADO</strong> aparecerán aquí.</p>
+        <p style="font-size:0.85rem">Las liquidaciones en estado <strong>LIQUIDADO</strong> o <strong>CERRADO</strong> aparecerán aquí.</p>
       </div>
 
       <div v-else class="tbl-wrap">
@@ -112,7 +108,7 @@
               <td>{{ r.totalColaboradores }}</td>
               <td>{{ r.totalTiendas }}</td>
               <td style="font-weight:700">${{ r.totalComision.toLocaleString('es-CO') }}</td>
-              <td style="font-size:0.74rem">{{ formatFecha(r.fechaInicio) }}</td>
+              <td style="font-size:0.85rem">{{ formatFecha(r.fechaInicio) }}</td>
               <td>
                 <button class="btn sm ghost" @click="cargarDetalle(r.idLiquidacion)">
                   <i class="ti ti-eye"></i> Ver colaboradores
@@ -160,7 +156,7 @@
                   {{ c.idColaborador }}
                 </td>
                 <td>{{ c.idCargo }}</td>
-                <td>{{ c.idTienda ?? '—' }}</td>
+                <td>{{ c.codigoTienda ?? c.idTienda ?? '—' }}</td>
                 <td>{{ fmt(c.base.ventaBruta) }}</td>
                 <td>{{ fmt(c.base.ventaSinIva) }}</td>
                 <td>{{ fmt(c.base.comisionBancaria) }}</td>

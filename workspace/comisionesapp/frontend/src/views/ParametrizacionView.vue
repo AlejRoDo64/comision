@@ -15,15 +15,6 @@
       <i class="ti ti-alert-circle"></i> <span>{{ error }}</span>
     </div>
 
-    <div class="info-box blue">
-      <i class="ti ti-info-circle"></i>
-      <span>
-        Cada configuración se define por <strong>cargo</strong> (catálogo oficial Midasoft) y
-        <strong>período de calendario</strong>. Todo cambio exige un motivo y queda registrado
-        con usuario y fecha para auditoría.
-      </span>
-    </div>
-
     <!-- Filtros -->
     <div class="card" style="margin-bottom:14px">
       <div class="card-title"><i class="ti ti-filter"></i> Filtros</div>
@@ -58,12 +49,13 @@
         <i class="ti ti-settings-2"></i>
         {{ editandoId ? 'Editar parametrización' : 'Nueva parametrización' }}
       </div>
+      <p class="field-ayuda" style="margin:0 0 12px">Los campos marcados con * son obligatorios.</p>
 
       <!-- HU-02 (ajuste): primero la tienda; el cargo se vincula por su
            centro de costo, recuperado del API de empleados Midasoft -->
       <div class="form-row fc2">
         <div class="field">
-          <label>Tienda (centro de costo) *</label>
+          <label>Tienda *</label>
           <select v-model="formTienda" @change="onTiendaSeleccionada">
             <option value="">Seleccionar tienda...</option>
             <option v-for="t in tiendasCcosto" :key="t.ccosto" :value="t.ccosto">
@@ -72,7 +64,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Cargo (Midasoft) *</label>
+          <label>Cargo *</label>
           <select
             v-model="form.codigoOficio"
             :disabled="!formTienda && !editandoId"
@@ -298,7 +290,7 @@
       <div class="field" style="margin-top:12px">
         <label>Motivo del cambio (requerido para auditoría) *</label>
         <textarea v-model="form.motivo" rows="2" class="textarea-field"
-          placeholder="Describe el motivo de esta configuración..."></textarea>
+></textarea>
       </div>
 
       <div class="btn-group" style="margin-top:10px">

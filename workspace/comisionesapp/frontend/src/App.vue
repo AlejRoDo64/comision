@@ -61,18 +61,9 @@
           <span>Datos de origen</span>
         </RouterLink>
 
-        <template v-if="authStore.esAdministrador">
-          <span class="nav-sect" style="margin-top:8px">Sistema</span>
-
-          <div class="nav-item nav-disabled">
-            <i class="ti ti-users"></i>
-            <span>Usuarios y roles</span>
-          </div>
-          <div class="nav-item nav-disabled">
-            <i class="ti ti-shield-check"></i>
-            <span>Auditoría</span>
-          </div>
-        </template>
+        <!-- Sección "Sistema" retirada: sus opciones (Usuarios y roles, Auditoría)
+             aún no existen y mostrarlas deshabilitadas confunde al usuario.
+             Restaurar aquí cuando esas pantallas se implementen. -->
       </nav>
 
       <div class="sidebar-footer">
@@ -96,10 +87,7 @@
       </header>
 
       <main class="app-content">
-        <!-- Breadcrumb único del shell — antes copiado en cada vista -->
-        <div v-if="route.meta.title" class="breadcrumb">
-          Automatización Comisiones / <strong>{{ route.meta.title }}</strong>
-        </div>
+        <!-- El título del módulo ya lo muestra la barra superior (sin breadcrumb duplicado) -->
         <RouterView />
       </main>
     </div>

@@ -23,11 +23,7 @@
 
     <div class="info-box">
       <i class="ti ti-info-circle"></i>
-      <span>
-        Los estados <strong>En Curso</strong>, <strong>Liquidado</strong> y <strong>Cerrado</strong>
-        son asignados automáticamente por el motor de liquidación.
-        Solo es posible eliminar períodos en estado <strong>Abierto</strong>.
-      </span>
+      <span>Solo puede modificar o eliminar períodos en estado <strong>Abierto</strong>. Los demás estados cambian automáticamente al liquidar.</span>
     </div>
 
     <!-- Formulario nuevo calendario -->
@@ -36,11 +32,11 @@
       <div class="form-row fc2">
         <div class="field">
           <label>Nombre</label>
-          <input v-model="formCal.nombre" type="text" placeholder="ej. Comisiones 2027" />
+          <input v-model="formCal.nombre" type="text" />
         </div>
         <div class="field">
           <label>Año</label>
-          <input v-model.number="formCal.anio" type="number" placeholder="2027" min="2000" max="2100" />
+          <input v-model.number="formCal.anio" type="number" min="2000" max="2100" />
         </div>
       </div>
       <div class="btn-group" style="margin-top:6px">
@@ -64,7 +60,8 @@
         </div>
         <div class="field">
           <label>Código (opcional)</label>
-          <input v-model="formPer.codigo" type="text" placeholder="se genera automático (ej. ENE-2027)" />
+          <input v-model="formPer.codigo" type="text" />
+          <span class="field-ayuda">Si lo deja vacío, se genera automáticamente (ej. ENE-2027).</span>
         </div>
       </div>
       <div class="form-row fc2">
@@ -92,12 +89,10 @@
       </div>
       <div class="info-box" style="margin-bottom:10px">
         <i class="ti ti-info-circle"></i>
-        <span>
-          Genera los 12 períodos en una sola transacción atómica con el patrón
-          <strong>{{ formAnio.patron.diaInicio }} → {{ formAnio.patron.diaFin }}</strong>
-          (por defecto día 21 del mes anterior al día 20 del mes actual).
-          Solo es válido si el calendario aún no tiene períodos.
-        </span>
+        <span>Crea de una vez los 12 períodos del año, cada uno del día
+          <strong>{{ formAnio.patron.diaInicio }}</strong> al día
+          <strong>{{ formAnio.patron.diaFin }}</strong> del mes siguiente.
+          El calendario debe estar vacío.</span>
       </div>
       <div class="form-row fc3">
         <div class="field">

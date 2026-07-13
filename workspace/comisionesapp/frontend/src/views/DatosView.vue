@@ -12,11 +12,7 @@
 
     <div class="info-box blue">
       <i class="ti ti-info-circle"></i>
-      <span>
-        Consulta directa a las fuentes externas en modo <strong>solo lectura</strong>:
-        ventas/comisiones POS desde <strong>INDICADORES (ICG)</strong> y base de empleados
-        desde <strong>Midasoft</strong>. Son los mismos datos que consumirá el motor de liquidación.
-      </span>
+      <span>Consulta de <strong>solo lectura</strong> de las ventas (ICG) y de la base de empleados (Midasoft).</span>
     </div>
 
     <div v-if="error" class="info-box danger">

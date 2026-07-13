@@ -32,7 +32,6 @@
             id="password"
             v-model="form.password"
             type="password"
-            placeholder="••••••••"
             autocomplete="current-password"
             :disabled="cargando"
           />
