@@ -267,12 +267,12 @@
       <div class="tbl-wrap">
         <table>
           <thead>
-            <tr><th>Desde (%)</th><th>Hasta (% — vacío = ∞)</th><th>Comisión (%)</th><th style="width:50px"></th></tr>
+            <tr><th>Desde (%)</th><th>Hasta (%)</th><th>Comisión (%)</th><th style="width:50px"></th></tr>
           </thead>
           <tbody>
             <tr v-for="(r, i) in form.rangos" :key="i">
               <td><input v-model.number="r.desdePorc" type="number" min="0" step="0.01" class="inp-sm" /></td>
-              <td><input v-model="r.hastaRaw" type="number" min="0" step="0.01" placeholder="∞" class="inp-sm" /></td>
+              <td><input v-model="r.hastaRaw" type="number" min="0" step="0.01" class="inp-sm" /></td>
               <td><input v-model.number="r.comisionPorc" type="number" min="0" step="0.0001" class="inp-sm" /></td>
               <td>
                 <button class="btn sm danger icon" @click="form.rangos.splice(i, 1)">
@@ -283,6 +283,9 @@
           </tbody>
         </table>
       </div>
+      <p class="field-ayuda" style="margin:6px 0 0">
+        Deje "Hasta" vacío en el último rango para indicar que aplica de ese porcentaje en adelante, sin límite.
+      </p>
       <button class="btn sm ghost" style="margin-top:6px" @click="agregarRango">
         <i class="ti ti-plus"></i> Agregar rango
       </button>
