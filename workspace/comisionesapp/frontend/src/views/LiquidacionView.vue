@@ -53,7 +53,13 @@
         <span v-if="elegibilidad.elegible">
           Elegible para liquidación: período anterior cerrado ✓ · parametrización vigente ✓
         </span>
-        <span v-else>{{ elegibilidad.motivo }}</span>
+        <!-- Checklist real cuando NO es elegible: cada condición con su estado -->
+        <span v-else>
+          {{ elegibilidad.motivo }}
+          <br />
+          Período anterior cerrado: {{ elegibilidad.periodoAnteriorCerrado ? '✓' : '✗' }} ·
+          Parametrización vigente: {{ elegibilidad.parametrizacionVigente ? '✓' : '✗' }}
+        </span>
       </div>
     </div>
 

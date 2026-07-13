@@ -89,7 +89,7 @@
         </div>
         <div class="field">
           <label>Período de vigencia *</label>
-          <select v-model="form.idPeriodo">
+          <select v-model="form.idPeriodo" @change="onPeriodoSeleccionado">
             <option value="">Seleccionar...</option>
             <option v-for="p in periodosForm" :key="p.idPeriodo" :value="p.idPeriodo">{{ p.codigo }}</option>
           </select>
@@ -560,6 +560,17 @@ function onCargoSeleccionado() {
   // Sugerir la afectación oficial del catálogo (HU-02)
   const c = cargos.value.find(x => x.codigo === form.value.codigoOficio);
   if (c) form.value.tipoAfectacion = c.afectacion;
+}
+
+/**
+ * La vigencia se alinea automáticamente al inicio del período elegido:
+ * el motor evalúa la vigencia en esa fecha, así que un "desde" posterior
+ * dejaría la parametrización sin efecto para el período.
+ */
+function onPeriodoSeleccionado() {
+  if (editandoId.value) return;   // al editar se respeta la vigencia guardada
+  const p = periodosForm.value.find(x => x.idPeriodo === form.value.idPeriodo);
+  if (p) form.value.vigenciaDesde = p.fechaInicio;
 }
 
 async function abrirEdicion(p: ParametrizacionCargo) {

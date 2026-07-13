@@ -152,10 +152,23 @@ export class LiquidacionService implements OnApplicationBootstrap {
     }
 
     const parametrizaciones = await this.obtenerParametrizacionesVigentes(periodo);
+    if (!parametrizaciones.length) {
+      // HU-03: no se permite ejecutar si faltan datos críticos. La vigencia se
+      // evalúa en la fecha de inicio del período: la parametrización debe
+      // cubrir esa fecha (o no tener vigencia definida).
+      return {
+        elegible: false,
+        motivo:
+          `No hay parametrización vigente para este período: la vigencia debe cubrir ` +
+          `la fecha de inicio (${periodo.fechaInicio}). Revise las vigencias en Parametrización.`,
+        periodoAnteriorCerrado,
+        parametrizacionVigente: false,
+      };
+    }
     return {
       elegible: true,
       periodoAnteriorCerrado,
-      parametrizacionVigente: parametrizaciones.length > 0,
+      parametrizacionVigente: true,
     };
   }
 
