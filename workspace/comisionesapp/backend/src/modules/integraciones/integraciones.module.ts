@@ -11,10 +11,15 @@ import { IntegracionesController } from './integraciones.controller';
  *  - SQL Server INDICADORES (10.1.5.61) — ventas ICG vía stored procedures (conexión perezosa).
  *  - API Midasoft — base de empleados / novedades / marcaciones.
  *
- * FUENTES_MODO en .env conmuta la implementación SIN tocar consumidores:
- *  - real (default): conexiones oficiales.
- *  - mock: datos de prueba desde Datatest/ (desarrollo sin acceso a la red).
+ * Modo por FUENTE en .env (cada una conmuta de forma independiente):
+ *  - MIDASOFT_MODO:    real | mock
+ *  - INDICADORES_MODO: real | mock
+ * Si no se definen, heredan de FUENTES_MODO (compatibilidad); default: real.
+ * mock = datos de prueba desde Datatest/ (desarrollo sin acceso a la red).
  */
+const modoFuente = (cfg: ConfigService, especifica: string): string =>
+  cfg.get<string>(especifica) ?? cfg.get<string>('FUENTES_MODO') ?? 'real';
+
 @Module({
   controllers: [IntegracionesController],
   providers: [
@@ -22,7 +27,7 @@ import { IntegracionesController } from './integraciones.controller';
       provide: IndicadoresService,
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) =>
-        cfg.get<string>('FUENTES_MODO') === 'mock'
+        modoFuente(cfg, 'INDICADORES_MODO') === 'mock'
           ? new IndicadoresMockService(cfg)
           : new IndicadoresService(cfg),
     },
@@ -30,7 +35,7 @@ import { IntegracionesController } from './integraciones.controller';
       provide: MidasoftService,
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) =>
-        cfg.get<string>('FUENTES_MODO') === 'mock'
+        modoFuente(cfg, 'MIDASOFT_MODO') === 'mock'
           ? new MidasoftMockService(cfg)
           : new MidasoftService(cfg),
     },
