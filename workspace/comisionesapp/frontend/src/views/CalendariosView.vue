@@ -201,6 +201,7 @@ import {
   obtenerMensajeError,
 } from '@/services/api';
 import { clsEstado } from '@/utils/formato';
+import { anioActual, ventanaPeriodoActual } from '@/utils/fechas';
 import ConfirmarEliminacion from '@/components/ConfirmarEliminacion.vue';
 
 const dialogoEliminar = ref<InstanceType<typeof ConfirmarEliminacion> | null>(null);
@@ -218,8 +219,15 @@ const guardandoCal   = ref(false);
 const guardandoPer   = ref(false);
 const generandoAnio  = ref(false);
 
-const formCal = ref({ nombre: '', anio: new Date().getFullYear() + 1 });
-const formPer = ref({ idCalendario: '', codigo: '', fechaInicio: '', fechaFin: '' });
+// Valores por defecto asignados al tiempo actual (año en curso y la
+// ventana 21→20 que contiene la fecha de hoy); el usuario puede editarlos.
+const formCalVacio = () => ({ nombre: `Comisiones ${anioActual()}`, anio: anioActual() });
+const formPerVacio = () => {
+  const ventana = ventanaPeriodoActual();
+  return { idCalendario: '', codigo: '', fechaInicio: ventana.inicio, fechaFin: ventana.fin };
+};
+const formCal = ref(formCalVacio());
+const formPer = ref(formPerVacio());
 // El año se toma del calendario activo; el formulario solo captura el patrón
 const formAnio = ref({
   patron: { diaInicio: 21, diaFin: 20 },
@@ -341,12 +349,12 @@ async function eliminarPeriodo(p: Periodo) {
 
 function cancelarFormCal() {
   mostrarFormCal.value = false;
-  formCal.value = { nombre: '', anio: new Date().getFullYear() + 1 };
+  formCal.value = formCalVacio();
 }
 
 function cancelarFormPer() {
   mostrarFormPer.value = false;
-  formPer.value = { idCalendario: calActivo.value?.idCalendario ?? '', codigo: '', fechaInicio: '', fechaFin: '' };
+  formPer.value = { ...formPerVacio(), idCalendario: calActivo.value?.idCalendario ?? '' };
 }
 
 function abrirGenerarAnio() {

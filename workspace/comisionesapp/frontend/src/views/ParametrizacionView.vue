@@ -395,6 +395,7 @@ import {
   obtenerMensajeError,
 } from '@/services/api';
 import { formatearMoneda } from '@/utils/formato';
+import { hoyIso } from '@/utils/fechas';
 
 const dialogoEliminar = ref<InstanceType<typeof ConfirmarEliminacion> | null>(null);
 const cargando  = ref(false);
@@ -433,7 +434,7 @@ const formVacio = () => ({
   validarPresupuesto: false,
   validarCrecimiento: false,
   tipoAfectacion: 'NovedadesDiarias' as 'HorasLaboradas' | 'NovedadesDiarias',
-  vigenciaDesde: '',
+  vigenciaDesde: hoyIso(),   // vigencia desde hoy por defecto
   vigenciaHasta: '',
   estrategiaTipoDescuento: '' as '' | EstrategiaTipoDescuento,
   estrategiaPorcDescuentoCorporativo: 0,

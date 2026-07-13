@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { integracionesApi, obtenerMensajeError, type FilaDatos } from '@/services/api';
+import { hoyIso, primerDiaMesIso } from '@/utils/fechas';
 
 type FuenteId = 'resumen' | 'detalle' | 'empleados';
 
@@ -107,8 +108,9 @@ const fuentes: Array<{ id: FuenteId; nombre: string; icono: string }> = [
 const LIMITE = 300;
 
 const fuente       = ref<FuenteId>('resumen');
-const fechaInicial = ref('');
-const fechaFinal   = ref('');
+// Rango por defecto: del primer día del mes en curso hasta hoy
+const fechaInicial = ref(primerDiaMesIso());
+const fechaFinal   = ref(hoyIso());
 const busqueda     = ref('');
 const cargando     = ref(false);
 const consultado   = ref(false);
