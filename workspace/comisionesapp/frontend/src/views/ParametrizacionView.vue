@@ -219,7 +219,7 @@
             <tbody>
               <tr v-for="r in presupuestoRangosMostrados" :key="r.idRango">
                 <td>{{ r.desdePorc }}</td>
-                <td>{{ r.hastaPorc ?? '∞' }}</td>
+                <td>{{ r.hastaPorc ?? 'Sin límite' }}</td>
                 <td>{{ r.porcLinea }}</td>
                 <td>{{ r.porcPromocion }}</td>
               </tr>
@@ -241,7 +241,7 @@
             <tbody>
               <tr v-for="r in crecimientoMostrado" :key="r.idRango">
                 <td>{{ r.desdePorcCrec }}</td>
-                <td>{{ r.hastaPorcCrec ?? '∞' }}</td>
+                <td>{{ r.hastaPorcCrec ?? 'Sin límite' }}</td>
                 <td>{{ r.porcLinea }}</td>
                 <td>{{ r.porcPromocion }}</td>
               </tr>
@@ -341,7 +341,9 @@
               <td style="font-size:0.74rem">{{ resumenVigencia(p) }}</td>
               <td style="font-size:0.74rem">{{ etiquetaEstrategia(p) }}</td>
               <td>
-                <span class="tag" :title="resumenRangos(p)">{{ p.rangos?.length ?? 0 }} rangos</span>
+                <span class="tag" :title="resumenRangos(p)">
+                  {{ (p.rangos?.length ?? 0) === 1 ? '1 rango' : (p.rangos?.length ?? 0) + ' rangos' }}
+                </span>
               </td>
               <td>
                 <span :class="['status', p.estadoActivo ? 's-active' : 's-closed']">
@@ -713,13 +715,17 @@ function etiquetaLiq(t: string) {
 
 function resumenRangos(p: ParametrizacionCargo) {
   return (p.rangos ?? [])
-    .map(r => `${r.desdePorc}–${r.hastaPorc ?? '∞'}% → ${r.comisionPorc}%`)
+    .map(r => (r.hastaPorc != null
+      ? `${r.desdePorc}% a ${r.hastaPorc}%: comisión ${r.comisionPorc}%`
+      : `${r.desdePorc}% en adelante: comisión ${r.comisionPorc}%`))
     .join(' | ');
 }
 
 function resumenVigencia(p: ParametrizacionCargo) {
   if (!p.vigenciaDesde && !p.vigenciaHasta) return '—';
-  return `${p.vigenciaDesde ?? '∞'} → ${p.vigenciaHasta ?? '∞'}`;
+  if (p.vigenciaDesde && !p.vigenciaHasta) return `Desde ${p.vigenciaDesde}`;
+  if (!p.vigenciaDesde && p.vigenciaHasta) return `Hasta ${p.vigenciaHasta}`;
+  return `${p.vigenciaDesde} a ${p.vigenciaHasta}`;
 }
 
 function etiquetaEstrategia(p: ParametrizacionCargo) {
