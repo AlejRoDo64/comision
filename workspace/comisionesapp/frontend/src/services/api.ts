@@ -370,6 +370,9 @@ export const liquidacionApi = {
   /** Descarga el archivo plano de nómina (HU-03) como blob. */
   descargarArchivo: (id: string) =>
     api.get<Blob>(`/liquidacion/${id}/archivo`, { responseType: 'blob' }),
+  /** Solicita detener la liquidación en ejecución del período (HU-03). */
+  detener: (idPeriodo: string) =>
+    api.post<{ mensaje: string }>('/liquidacion/detener', { idPeriodo }).then((r) => r.data),
 };
 
 // ── Trazabilidad (HU-04) ──────────────────────────────────────────

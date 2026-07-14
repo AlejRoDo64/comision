@@ -18,6 +18,8 @@ export enum EstadoLiquidacion {
   LIQUIDADO  = 'LIQUIDADO',
   ERROR      = 'ERROR',
   CERRADO    = 'CERRADO',
+  /** Detenida por el usuario durante la ejecución (HU-03: botón Detener). */
+  CANCELADA  = 'CANCELADA',
 }
 
 /**

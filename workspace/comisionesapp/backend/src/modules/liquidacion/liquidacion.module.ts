@@ -17,6 +17,7 @@ import { SubPeriodoService } from './services/subperiodo.service';
 import { ReglasComisionService } from './services/reglas-comision.service';
 import { ArchivoPlanoService } from './services/archivo-plano.service';
 import { LiquidacionLockService } from './services/liquidacion-lock.service';
+import { LiquidacionCancelacionService } from './services/liquidacion-cancelacion.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LiquidacionLockService } from './services/liquidacion-lock.service';
     ReglasComisionService,
     ArchivoPlanoService,
     LiquidacionLockService,
+    LiquidacionCancelacionService,
   ],
   exports: [LiquidacionService],
 })

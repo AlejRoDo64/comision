@@ -23,6 +23,10 @@ import { Marcacion, Novedad } from './afectaciones.service';
 import { codigoOficioBase } from '../../../common/utils/oficio.util';
 import { ArchivoPlanoService } from './archivo-plano.service';
 import { LiquidacionLockService } from './liquidacion-lock.service';
+import {
+  LiquidacionCancelacionService,
+  LiquidacionDetenida,
+} from './liquidacion-cancelacion.service';
 import { IndicadoresService } from '../../integraciones/indicadores.service';
 import { MidasoftService } from '../../integraciones/midasoft.service';
 
@@ -70,6 +74,7 @@ export class LiquidacionService implements OnApplicationBootstrap {
 
     private readonly dataSource: DataSource,
     private readonly lockService: LiquidacionLockService,
+    private readonly cancelacion: LiquidacionCancelacionService,
     private readonly normalizacion: NormalizacionService,
     private readonly subPeriodo: SubPeriodoService,
     private readonly reglas: ReglasComisionService,
@@ -186,7 +191,13 @@ export class LiquidacionService implements OnApplicationBootstrap {
     }
 
     return this.lockService.ejecutarBajoLock(idPeriodo, async () => {
-      return this.ejecutarTransaccional(entrada);
+      // Habilita el botón "Detener" solo mientras este período está corriendo
+      this.cancelacion.registrarInicio(idPeriodo);
+      try {
+        return await this.ejecutarTransaccional(entrada);
+      } finally {
+        this.cancelacion.registrarFin(idPeriodo);
+      }
     });
   }
 
@@ -224,6 +235,7 @@ export class LiquidacionService implements OnApplicationBootstrap {
       if (!periodo) throw new NotFoundException('Período no encontrado');
 
       // 3) Consumir ventas + com. bancaria de ICG
+      this.puntoDeControl(input.idPeriodo, 'CONSUMO_ICG');
       const [ventas, comisionBancariaTotal] = await Promise.all([
         this.consumirVentasICG(periodo),
         this.consumirComisionBancariaICG(periodo),
@@ -241,6 +253,7 @@ export class LiquidacionService implements OnApplicationBootstrap {
       // 5) Consumir empleados / novedades / marcaciones / cambios de Midasoft.
       // Los empleados van primero: aportan la correlación código Midasoft → cédula
       // con la que se indexan novedades y marcaciones (ICG identifica por cédula).
+      this.puntoDeControl(input.idPeriodo, 'CONSUMO_MIDASOFT');
       const empleados = await this.consumirEmpleadosMidasoft(periodo);
       const cedulaPorCodigo = new Map(empleados.map((e) => [e.idMidasoft, e.idColaborador]));
       const [novPorColab, marPorColab, cambios] = await Promise.all([
@@ -261,6 +274,7 @@ export class LiquidacionService implements OnApplicationBootstrap {
         `${subGenerados.length} tramos generados`, null, t3 - t2);
 
       // 7) Calcular comisión — multi-cargo: iterar todas las parametrizaciones
+      this.puntoDeControl(input.idPeriodo, 'CALCULO');
       const parametrizaciones = await this.obtenerParametrizacionesVigentes(periodo);
       if (!parametrizaciones.length) {
         throw new BadRequestException(
@@ -268,17 +282,42 @@ export class LiquidacionService implements OnApplicationBootstrap {
         );
       }
 
+      // HU-03: "identificar cada colaborador activo DEL CARGO" — cada
+      // parametrización aplica ÚNICAMENTE a los colaboradores cuyo cargo
+      // real (Midasoft) coincide con el cargo parametrizado.
+      const cargoPorCedula = new Map(empleados.map((e) => [e.idColaborador, e.idCargoInicial]));
       const resultadoAcumulado: ResultadoRegla = { detalles: [] };
       for (const param of parametrizaciones) {
+        const colabsDelCargo = colabNorm.filter(
+          (c) => cargoPorCedula.get(c.idColaborador) === param.codigoOficio,
+        );
+        await this.logDirecto(liquidacion.idLiquidacion, 'CALCULO', NivelLog.INFO,
+          `Cargo ${param.codigoOficio} (${param.nombreCargo}): ${colabsDelCargo.length} colaborador(es) con ventas`,
+          { cargo: param.codigoOficio, colaboradores: colabsDelCargo.length }, 0);
+        if (!colabsDelCargo.length) continue;
+
         const r = this.reglas.aplicar(
           param,
-          colabNorm,
+          colabsDelCargo,
           novPorColab,
           marPorColab,
           null,    // presupuestoPorTiendaOCargo (Fase 6.4)
           null,    // ventaAnteriorPorUnidad (Fase 6.4)
         );
         resultadoAcumulado.detalles.push(...r.detalles);
+      }
+
+      // Colaboradores vigentes con ventas cuyo cargo NO tiene parametrización:
+      // no comisionan, pero queda constancia auditable.
+      const cargosParametrizados = new Set(parametrizaciones.map((p) => p.codigoOficio));
+      const sinParametrizacion = colabNorm.filter((c) => {
+        const cargo = cargoPorCedula.get(c.idColaborador);
+        return cargo !== undefined && !cargosParametrizados.has(cargo);
+      });
+      if (sinParametrizacion.length) {
+        await this.logDirecto(liquidacion.idLiquidacion, 'EXCLUSION', NivelLog.WARN,
+          `${sinParametrizacion.length} colaborador(es) con ventas cuyo cargo no tiene parametrización — no comisionan`,
+          { sinParametrizacion: sinParametrizacion.map((c) => c.idColaborador) }, 0);
       }
       const t4 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'CALCULO', NivelLog.OK,
@@ -312,6 +351,8 @@ export class LiquidacionService implements OnApplicationBootstrap {
 
       // 8-11) Persistencia, cierre de la liquidación y cambio de estado del
       // período en UNA sola transacción (HU-03: rollback total ante fallo).
+      // Último punto de detención: después de aquí el resultado se persiste.
+      this.puntoDeControl(input.idPeriodo, 'PERSISTENCIA');
       const parametrizacionParaArchivo = parametrizaciones[0];   // cabecera representativa
       // HU-03: EMPLEADO del plano = código Midasoft, no la cédula
       const codigoPorCedula = new Map(empleados.map((e) => [e.idColaborador, e.idMidasoft]));
@@ -427,6 +468,20 @@ export class LiquidacionService implements OnApplicationBootstrap {
 
       return finalizada;
     } catch (e: any) {
+      // Detención solicitada por el usuario: no es una falla. La liquidación
+      // queda CANCELADA y el período sigue Abierto para corregir y reintentar.
+      if (e instanceof LiquidacionDetenida) {
+        await this.liqRepo.update(liquidacion.idLiquidacion, {
+          estado: EstadoLiquidacion.CANCELADA,
+          fechaFin: new Date(),
+        });
+        await this.logDirecto(liquidacion.idLiquidacion, 'CANCELADO', NivelLog.WARN,
+          e.message, null, Date.now() - t0);
+        throw new BadRequestException(
+          'Proceso detenido por el usuario. No se guardó ningún resultado; ' +
+          'el período sigue Abierto: corrija lo necesario y ejecute de nuevo.',
+        );
+      }
       await this.liqRepo.update(liquidacion.idLiquidacion, {
         estado: EstadoLiquidacion.ERROR,
         fechaFin: new Date(),
@@ -435,6 +490,26 @@ export class LiquidacionService implements OnApplicationBootstrap {
         `Error: ${e?.message ?? e}`, null, Date.now() - t0);
       throw e;
     }
+  }
+
+  /** Punto de control (HU-03 — Detener): aborta entre pasos si el usuario lo pidió. */
+  private puntoDeControl(idPeriodo: string, siguientePaso: string): void {
+    if (this.cancelacion.fueSolicitada(idPeriodo)) {
+      throw new LiquidacionDetenida(siguientePaso);
+    }
+  }
+
+  /** Solicita detener la liquidación en curso del período (UUID o código). */
+  async detener(idOCodigoPeriodo: string): Promise<{ mensaje: string }> {
+    const idPeriodo = await this.resolverIdPeriodo(idOCodigoPeriodo);
+    if (!this.cancelacion.solicitarDetencion(idPeriodo)) {
+      throw new BadRequestException(
+        'No hay una liquidación en ejecución para este período.',
+      );
+    }
+    return {
+      mensaje: 'Detención solicitada: el proceso se interrumpirá en el siguiente paso.',
+    };
   }
 
   // ── Cierre manual (HU-03 — Cerrar Período) ────────────────────────

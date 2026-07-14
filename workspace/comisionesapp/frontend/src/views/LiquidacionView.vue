@@ -15,6 +15,13 @@
           <i class="ti ti-player-play"></i>
           {{ ejecutando ? 'Ejecutando…' : 'Iniciar liquidación' }}
         </button>
+        <button
+          v-if="ejecutando"
+          class="btn sm danger"
+          @click="detenerLiquidacion"
+        >
+          <i class="ti ti-player-stop"></i> Detener proceso
+        </button>
       </div>
     </div>
 
@@ -248,6 +255,16 @@ async function iniciarLiquidacion() {
     error.value = obtenerMensajeError(e, 'Error al ejecutar la liquidación.');
   } finally {
     ejecutando.value = false;
+  }
+}
+
+/** HU-03 — botón "Detener proceso": interrumpe la ejecución en curso. */
+async function detenerLiquidacion() {
+  if (!idPeriodo.value) return;
+  try {
+    await liquidacionApi.detener(idPeriodo.value);
+  } catch (e: unknown) {
+    error.value = obtenerMensajeError(e, 'No fue posible solicitar la detención.');
   }
 }
 

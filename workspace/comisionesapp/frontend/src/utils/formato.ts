@@ -33,6 +33,7 @@ export function clsEstado(estado: string): string {
     LIQUIDADO: 's-active',
     CERRADO: 's-closed',
     ERROR: 's-err',
+    CANCELADA: 's-warn',
   };
   return mapa[estado] ?? '';
 }

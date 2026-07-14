@@ -58,6 +58,15 @@ export class LiquidacionController {
     });
   }
 
+  @Post('detener')
+  @Roles('PROFESIONAL_COMISIONES')
+  @ApiOperation({
+    summary: 'Detener la liquidación en ejecución del período (HU-03 — botón Detener)',
+  })
+  detener(@Body() dto: EjecutarLiquidacionDto) {
+    return this.svc.detener(dto.idPeriodo);
+  }
+
   @Patch(':id/cerrar')
   @Roles('PROFESIONAL_COMISIONES')
   @ApiOperation({ summary: 'Cerrar una liquidación LIQUIDADO → CERRADO' })
