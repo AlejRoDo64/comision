@@ -220,19 +220,25 @@ export class LiquidacionService implements OnApplicationBootstrap {
         usuarioEjecuta: input.usuario,
         parametrizacionId: null,
       });
-      const saved = (await manager.getRepository(Liquidacion).save(liq)) as unknown as Liquidacion;
+      const saved = await manager.getRepository(Liquidacion).save(liq);
       await this.logEnTx(manager, saved.idLiquidacion, 'INICIO', NivelLog.INFO,
         `Liquidación iniciada por ${input.usuario}`, null, Date.now() - t0);
       return saved;
     });
-    const t1 = Date.now();
-
     try {
       const periodo = await this.periodoRepo.findOne({
         where: { idPeriodo: input.idPeriodo },
         relations: ['calendario'],
       });
       if (!periodo) throw new NotFoundException('Período no encontrado');
+
+      // Cronómetro por paso: cada log registra SOLO la duración de su paso
+      let tPaso = Date.now();
+      const duracionPaso = () => {
+        const d = Date.now() - tPaso;
+        tPaso = Date.now();
+        return d;
+      };
 
       // 3) Consumir ventas + com. bancaria de ICG
       this.puntoDeControl(input.idPeriodo, 'CONSUMO_ICG');
@@ -242,13 +248,12 @@ export class LiquidacionService implements OnApplicationBootstrap {
       ]);
       await this.logDirecto(liquidacion.idLiquidacion, 'CONSUMO_ICG', NivelLog.OK,
         `Ventas: ${ventas.length} · Com. bancaria: ${comisionBancariaTotal}`,
-        { ventas: ventas.length, comisionBancaria: comisionBancariaTotal }, t1 - t0);
+        { ventas: ventas.length, comisionBancaria: comisionBancariaTotal }, duracionPaso());
 
       // 4) Normalizar
       const colabNorm = this.normalizacion.normalizar(ventas, comisionBancariaTotal);
-      const t2 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'NORMALIZACION', NivelLog.OK,
-        `${colabNorm.length} colaboradores normalizados`, null, t2 - t1);
+        `${colabNorm.length} colaboradores normalizados`, null, duracionPaso());
 
       // 5) Consumir empleados / novedades / marcaciones / cambios de Midasoft.
       // Los empleados van primero: aportan la correlación código Midasoft → cédula
@@ -263,15 +268,14 @@ export class LiquidacionService implements OnApplicationBootstrap {
       ]);
       await this.logDirecto(liquidacion.idLiquidacion, 'CONSUMO_MIDASOFT', NivelLog.OK,
         `Empleados: ${empleados.length} · Cambios: ${cambios.length}`,
-        { empleados: empleados.length, cambios: cambios.length }, t2 - t1);
+        { empleados: empleados.length, cambios: cambios.length }, duracionPaso());
 
       // 6) Generar subperíodos
       const subGenerados = this.subPeriodo.generar(
         empleados, cambios, periodo.fechaInicio, periodo.fechaFin,
       );
-      const t3 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'SUBPERIODOS', NivelLog.OK,
-        `${subGenerados.length} tramos generados`, null, t3 - t2);
+        `${subGenerados.length} tramos generados`, null, duracionPaso());
 
       // 7) Calcular comisión — multi-cargo: iterar todas las parametrizaciones
       this.puntoDeControl(input.idPeriodo, 'CALCULO');
@@ -319,11 +323,10 @@ export class LiquidacionService implements OnApplicationBootstrap {
           `${sinParametrizacion.length} colaborador(es) con ventas cuyo cargo no tiene parametrización — no comisionan`,
           { sinParametrizacion: sinParametrizacion.map((c) => c.idColaborador) }, 0);
       }
-      const t4 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'CALCULO', NivelLog.OK,
         `${parametrizaciones.length} parametrización(es) · ${resultadoAcumulado.detalles.length} líneas de detalle`,
         { parametrizaciones: parametrizaciones.length, detalles: resultadoAcumulado.detalles.length },
-        t4 - t3);
+        duracionPaso());
 
       // Solo se liquidan colaboradores con subperíodo, es decir, empleados de
       // Midasoft vigentes en el período. Vendedores presentes en ICG pero sin
@@ -442,29 +445,27 @@ export class LiquidacionService implements OnApplicationBootstrap {
           })),
         );
         liquidacion.archivoPlanoPath = join('liquidaciones', `${liquidacion.idLiquidacion}.txt`);
-        const fin = (await manager
+        const fin = await manager
           .getRepository(Liquidacion)
-          .save(liquidacion)) as unknown as Liquidacion;
+          .save(liquidacion);
 
         await manager.getRepository(Periodo).update(input.idPeriodo, {
           estadoOperativo: EstadoOperativo.LIQUIDADO,
         });
         return fin;
       });
-      const t5 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'PERSISTENCIA', NivelLog.OK,
-        'Subperíodos, detalles, cierre y estado del período persistidos (tx única)', null, t5 - t4);
+        'Subperíodos, detalles, cierre y estado del período persistidos (tx única)', null, duracionPaso());
 
       // Archivo plano de nómina: entregable físico de HU-03
       await this.escribirArchivoPlano(finalizada.archivoPlanoPath!, contenido);
-      const t6 = Date.now();
       await this.logDirecto(liquidacion.idLiquidacion, 'ARCHIVO_PLANO', NivelLog.OK,
         `Archivo plano generado (${contenido.split('\n').length - 1} líneas)`,
-        null, t6 - t5);
+        null, duracionPaso());
 
       await this.logDirecto(liquidacion.idLiquidacion, 'FIN', NivelLog.OK,
         `Liquidación completada en ${Date.now() - t0}ms — ${colabUnicos.size} colaboradores · ${tiendaUnicas.size} tiendas · $${totalComision.toFixed(2)}`,
-        null, Date.now() - t6);
+        null, Date.now() - t0);
 
       return finalizada;
     } catch (e: any) {
@@ -616,9 +617,8 @@ export class LiquidacionService implements OnApplicationBootstrap {
   }
 
   /**
-   * Total de comisión bancaria del período (suma de TotalImporte del SP).
-   * Como la comisión bancaria es por tienda, sumamos TotalImporte de cada tienda
-   * y lo，我们将
+   * Total de comisión bancaria del período: suma de la columna
+   * ComisionBancaria (por tienda) del resumen de INDICADORES.
    */
   private async consumirComisionBancariaICG(periodo: Periodo): Promise<number> {
     const rows = await this.indicadores.comisionesResumen(

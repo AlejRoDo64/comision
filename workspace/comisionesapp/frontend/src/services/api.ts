@@ -334,7 +334,7 @@ export const crecimientoRangosApi = {
 };
 
 // ── Liquidación (HU-03) ────────────────────────────────────────────
-export type EstadoLiquidacion = 'EN_CURSO' | 'LIQUIDADO' | 'ERROR' | 'CERRADO';
+export type EstadoLiquidacion = 'EN_CURSO' | 'LIQUIDADO' | 'ERROR' | 'CERRADO' | 'CANCELADA';
 
 export interface Liquidacion {
   idLiquidacion: string;

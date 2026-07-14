@@ -7,7 +7,6 @@ import {
   IsPositive,
   IsString,
   Length,
-  Min,
 } from 'class-validator';
 import { IsGuid } from '../../../common/validators/is-guid.validator';
 import { TipoPresupuesto } from '../entities/presupuesto-cargo-periodo.entity';
@@ -34,7 +33,6 @@ export class CrearPresupuestoDto {
   @ApiProperty({ example: 50000000, description: 'Valor presupuestado en COP' })
   @IsNumber()
   @IsPositive()
-  @Min(0)
   @Type(() => Number)
   valor: number;
 }
@@ -49,7 +47,6 @@ export class ActualizarPresupuestoDto {
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  @Min(0)
   @Type(() => Number)
   valor?: number;
 

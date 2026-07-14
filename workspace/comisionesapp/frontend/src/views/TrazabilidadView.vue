@@ -299,10 +299,10 @@ async function consultar() {
   cargando.value = true;
   error.value = '';
   try {
-    const dto: FiltrosTrazabilidad = {};
-    for (const [k, v] of Object.entries(filtros.value)) {
-      if (v !== '' && v != null) (dto as any)[k] = v;
-    }
+    // Solo se envían los filtros con valor; el tipado se conserva sin casts
+    const dto = Object.fromEntries(
+      Object.entries(filtros.value).filter(([, v]) => v !== '' && v != null),
+    ) as FiltrosTrazabilidad;
     resumen.value = await trazabilidadApi.resumen(dto);
   } catch (e: unknown) {
     error.value = obtenerMensajeError(e, 'Error al consultar.');

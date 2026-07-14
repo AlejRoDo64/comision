@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Periodo } from '../../calendarios/entities/periodo.entity';
+import { Tienda } from '../../catalogos/entities/tienda.entity';
 import {
   PresupuestoCargoPeriodo,
   TipoPresupuesto,
@@ -63,8 +65,8 @@ export class PresupuestosService {
       codigoOficio: dto.codigoOficio,
       tipo: dto.tipo,
       valor: dto.valor,
-      periodo: { idPeriodo: dto.idPeriodo } as any,
-      tienda: dto.idTienda ? ({ idTienda: dto.idTienda } as any) : null,
+      periodo: { idPeriodo: dto.idPeriodo } as Periodo,
+      tienda: dto.idTienda ? ({ idTienda: dto.idTienda } as Tienda) : null,
     });
     return this.repo.save(entity);
   }
@@ -74,7 +76,7 @@ export class PresupuestosService {
     if (dto.tipo) p.tipo = dto.tipo;
     if (dto.valor != null) p.valor = dto.valor;
     if (dto.idTienda !== undefined) {
-      p.tienda = dto.idTienda ? ({ idTienda: dto.idTienda } as any) : null;
+      p.tienda = dto.idTienda ? ({ idTienda: dto.idTienda } as Tienda) : null;
     }
     return this.repo.save(p);
   }

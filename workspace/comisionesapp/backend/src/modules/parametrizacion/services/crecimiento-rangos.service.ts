@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Periodo } from '../../calendarios/entities/periodo.entity';
 import { CrecimientoRango } from '../entities/crecimiento-rango.entity';
 import { CARGOS_CATALOGO, ICargosCatalogo } from './cargos-catalogo.service';
 import { CrearRangoTablaDto } from '../dto/crear-rango-tabla.dto';
@@ -53,12 +54,12 @@ export class CrecimientoRangosService {
     // delete + insert atómicos: un fallo no debe dejar la tabla vacía
     return this.repo.manager.transaction(async (manager) => {
       const repo = manager.getRepository(CrecimientoRango);
-      await repo.delete({ codigoOficio, periodo: { idPeriodo } as any });
+      await repo.delete({ codigoOficio, periodo: { idPeriodo } as Periodo });
       if (!rangos.length) return [];
       const entities = rangos.map((r) =>
         repo.create({
           codigoOficio,
-          periodo: { idPeriodo } as any,
+          periodo: { idPeriodo } as Periodo,
           desdePorcCrec: r.desdePorc,
           hastaPorcCrec: r.hastaPorc ?? null,
           porcLinea: r.porcLinea,
@@ -70,7 +71,7 @@ export class CrecimientoRangosService {
   }
 
   async removeAll(codigoOficio: string, idPeriodo: string): Promise<{ mensaje: string }> {
-    await this.repo.delete({ codigoOficio, periodo: { idPeriodo } as any });
+    await this.repo.delete({ codigoOficio, periodo: { idPeriodo } as Periodo });
     return { mensaje: `Rangos de crecimiento eliminados para ${codigoOficio}` };
   }
 
