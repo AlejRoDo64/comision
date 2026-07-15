@@ -58,9 +58,15 @@ export class CalendariosService {
     dto: CrearCalendarioDto,
     usuario: string,
   ): Promise<Calendario> {
-    const existe = await this.calRepo.findOne({ where: { anio: dto.anio } });
-    if (existe) {
-      throw new BadRequestException(`Ya existe un calendario para el año ${dto.anio}`);
+    // HU-01: se admiten MÚLTIPLES calendarios independientes por año; lo único
+    // que no puede repetirse es el NOMBRE dentro del mismo año.
+    const duplicado = await this.calRepo.findOne({
+      where: { anio: dto.anio, nombre: dto.nombre },
+    });
+    if (duplicado) {
+      throw new BadRequestException(
+        `Ya existe un calendario llamado "${dto.nombre}" para el año ${dto.anio}. Use un nombre distinto.`,
+      );
     }
     return this.dataSource.transaction(async (manager) => {
       const cal = manager.getRepository(Calendario).create({
