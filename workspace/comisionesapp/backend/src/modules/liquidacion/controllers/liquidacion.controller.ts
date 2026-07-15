@@ -44,7 +44,7 @@ export class LiquidacionController {
   }
 
   @Post('ejecutar')
-  @Roles('PROFESIONAL_COMISIONES')
+  @Roles('ADMINISTRADOR', 'PROFESIONAL_COMISIONES')
   @ApiOperation({
     summary: 'Ejecutar liquidación automática del período (síncrono)',
   })
@@ -59,7 +59,7 @@ export class LiquidacionController {
   }
 
   @Post('detener')
-  @Roles('PROFESIONAL_COMISIONES')
+  @Roles('ADMINISTRADOR', 'PROFESIONAL_COMISIONES')
   @ApiOperation({
     summary: 'Detener la liquidación en ejecución del período (HU-03 — botón Detener)',
   })
@@ -68,7 +68,7 @@ export class LiquidacionController {
   }
 
   @Patch(':id/cerrar')
-  @Roles('PROFESIONAL_COMISIONES')
+  @Roles('ADMINISTRADOR', 'PROFESIONAL_COMISIONES')
   @ApiOperation({ summary: 'Cerrar una liquidación LIQUIDADO → CERRADO' })
   cerrar(
     @Param('id', ParseUUIDPipe) id: string,
