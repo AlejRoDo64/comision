@@ -136,24 +136,37 @@
               <td style="font-size:0.85rem">{{ formatFecha(l.fechaInicio) }}</td>
               <td style="font-size:0.85rem">{{ l.fechaFin ? formatFecha(l.fechaFin) : '—' }}</td>
               <td>
-                <button v-if="l.estado === 'LIQUIDADO' || l.estado === 'CERRADO'"
-                        class="btn sm ghost"
-                        title="Descargar archivo plano de nómina"
-                        @click="descargarPlano(l)">
-                  <i class="ti ti-download"></i> Plano
-                </button>
-                <span v-else>—</span>
+                <div class="btn-group" style="flex-wrap:nowrap">
+                  <!-- Cierre desde el historial: desbloquea la liquidación del período siguiente -->
+                  <button v-if="l.estado === 'LIQUIDADO'"
+                          class="btn sm"
+                          title="Cerrar el período (habilita liquidar el siguiente)"
+                          @click="cerrarDesdeHistorial(l)">
+                    <i class="ti ti-lock"></i> Cerrar
+                  </button>
+                  <button v-if="l.estado === 'LIQUIDADO' || l.estado === 'CERRADO'"
+                          class="btn sm ghost"
+                          title="Descargar archivo plano de nómina"
+                          @click="descargarPlano(l)">
+                    <i class="ti ti-download"></i> Plano
+                  </button>
+                  <span v-if="l.estado !== 'LIQUIDADO' && l.estado !== 'CERRADO'">—</span>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Pop-up de reconfirmación (cierre de período) -->
+    <ConfirmarEliminacion ref="dialogoConfirmar" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import ConfirmarEliminacion from '@/components/ConfirmarEliminacion.vue';
 import {
   calendariosApi,
   periodosApi,
@@ -268,16 +281,37 @@ async function detenerLiquidacion() {
   }
 }
 
-async function cerrarLiquidacion() {
-  if (!liquidacionActual.value) return;
-  if (!confirm('¿Cerrar el período? Esta acción es irreversible.')) return;
+const dialogoConfirmar = ref<InstanceType<typeof ConfirmarEliminacion> | null>(null);
+
+/** Pide reconfirmación y cierra la liquidación (LIQUIDADO → CERRADO). */
+async function confirmarYCerrar(liq: Liquidacion): Promise<Liquidacion | null> {
+  const confirmado = await dialogoConfirmar.value?.abrir({
+    titulo: 'Cerrar período',
+    mensaje: `Se cerrará el período ${liq.periodo?.codigo ?? ''}. Un período Cerrado no se puede reliquidar; con esto se habilita la liquidación del período siguiente.`,
+    textoConfirmar: 'Sí, cerrar período',
+    iconoConfirmar: 'ti-lock',
+  });
+  if (!confirmado) return null;
   try {
-    const liq = await liquidacionApi.cerrar(liquidacionActual.value.idLiquidacion);
-    liquidacionActual.value = liq;
+    const cerrado = await liquidacionApi.cerrar(liq.idLiquidacion);
     await cargarCalendariosYPeriodos();
+    await cargarLiquidaciones();
+    return cerrado;
   } catch (e: unknown) {
     error.value = obtenerMensajeError(e, 'Error al cerrar.');
+    return null;
   }
+}
+
+async function cerrarLiquidacion() {
+  if (!liquidacionActual.value) return;
+  const cerrado = await confirmarYCerrar(liquidacionActual.value);
+  if (cerrado) liquidacionActual.value = cerrado;
+}
+
+/** HU-03: cierre desde el historial — desbloquea períodos que quedaron LIQUIDADOS. */
+async function cerrarDesdeHistorial(l: Liquidacion) {
+  await confirmarYCerrar(l);
 }
 
 async function cargarLiquidaciones() {

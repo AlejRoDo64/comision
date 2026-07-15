@@ -12,7 +12,7 @@
         <div class="btn-group modal-acciones">
           <button class="btn sm outlined" @click="responder(false)">Cancelar</button>
           <button class="btn sm danger" @click="responder(true)">
-            <i class="ti ti-trash"></i> Sí, eliminar
+            <i :class="['ti', iconoConfirmar]"></i> {{ textoConfirmar }}
           </button>
         </div>
       </div>
@@ -23,16 +23,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-// Modal de reconfirmación para acciones de eliminación (reemplaza a confirm()).
+// Modal de reconfirmación para acciones irreversibles (reemplaza a confirm()).
 // Uso: const ok = await dialogo.value.abrir({ mensaje: '¿Eliminar X?' });
+// Para acciones distintas a eliminar: abrir({ titulo, mensaje, textoConfirmar, iconoConfirmar }).
 const visible = ref(false);
 const titulo = ref('');
 const mensaje = ref('');
+const textoConfirmar = ref('Sí, eliminar');
+const iconoConfirmar = ref('ti-trash');
 let resolver: ((v: boolean) => void) | null = null;
 
-function abrir(opciones: { titulo?: string; mensaje: string }): Promise<boolean> {
+function abrir(opciones: {
+  titulo?: string;
+  mensaje: string;
+  textoConfirmar?: string;
+  iconoConfirmar?: string;
+}): Promise<boolean> {
   titulo.value = opciones.titulo ?? 'Confirmar eliminación';
   mensaje.value = opciones.mensaje;
+  textoConfirmar.value = opciones.textoConfirmar ?? 'Sí, eliminar';
+  iconoConfirmar.value = opciones.iconoConfirmar ?? 'ti-trash';
   visible.value = true;
   return new Promise((res) => {
     resolver = res;
