@@ -32,11 +32,11 @@
       <div class="form-row fc2">
         <div class="field">
           <label>Nombre</label>
-          <input v-model="formCal.nombre" type="text" />
+          <input v-model="formCal.nombre" type="text" placeholder="Calendario" />
         </div>
         <div class="field">
           <label>Año</label>
-          <input v-model.number="formCal.anio" type="number" min="2000" max="2100" />
+          <input v-model.number="formCal.anio" type="number" placeholder="2027" min="2000" max="2100" />
         </div>
       </div>
       <div class="btn-group" style="margin-top:6px">
@@ -60,7 +60,7 @@
         </div>
         <div class="field">
           <label>Código (opcional)</label>
-          <input v-model="formPer.codigo" type="text" />
+          <input v-model="formPer.codigo" type="text" placeholder="ej. ENE-2027" />
           <span class="field-ayuda">Si lo deja vacío, se genera automáticamente (ej. ENE-2027).</span>
         </div>
       </div>
@@ -221,7 +221,7 @@ const generandoAnio  = ref(false);
 
 // Valores por defecto asignados al tiempo actual (año en curso y la
 // ventana 21→20 que contiene la fecha de hoy); el usuario puede editarlos.
-const formCalVacio = () => ({ nombre: `Comisiones ${anioActual()}`, anio: anioActual() });
+const formCalVacio = () => ({ nombre: '', anio: anioActual() });
 const formPerVacio = () => {
   const ventana = ventanaPeriodoActual();
   return { idCalendario: '', codigo: '', fechaInicio: ventana.inicio, fechaFin: ventana.fin };

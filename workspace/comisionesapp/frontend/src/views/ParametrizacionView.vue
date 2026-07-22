@@ -126,15 +126,15 @@
       <div class="form-row fc3">
         <div class="field">
           <label>% Línea *</label>
-          <input v-model.number="form.porcLinea" type="number" min="0" step="0.0001" />
+          <input v-model.number="form.porcLinea" type="number" min="0" step="0.0001" placeholder="ej. 2.5" />
         </div>
         <div class="field">
           <label>% Promoción *</label>
-          <input v-model.number="form.porcPromocion" type="number" min="0" step="0.0001" />
+          <input v-model.number="form.porcPromocion" type="number" min="0" step="0.0001" placeholder="ej. 1.8" />
         </div>
         <div class="field">
           <label>% Línea Estrategia *</label>
-          <input v-model.number="form.porcEstrategia" type="number" min="0" step="0.0001" />
+          <input v-model.number="form.porcEstrategia" type="number" min="0" step="0.0001" placeholder="ej. 2.0" />
         </div>
       </div>
 
@@ -156,6 +156,7 @@
             type="number"
             min="0"
             step="0.0001"
+            placeholder="ej. 0.5"
             :disabled="form.estrategiaTipoDescuento !== 'CORPORATIVO'"
           />
         </div>
@@ -271,9 +272,9 @@
           </thead>
           <tbody>
             <tr v-for="(r, i) in form.rangos" :key="i">
-              <td><input v-model.number="r.desdePorc" type="number" min="0" step="0.01" class="inp-sm" /></td>
+              <td><input v-model.number="r.desdePorc" type="number" min="0" step="0.01" placeholder="ej. 80" class="inp-sm" /></td>
               <td><input v-model="r.hastaRaw" type="number" min="0" step="0.01" class="inp-sm" /></td>
-              <td><input v-model.number="r.comisionPorc" type="number" min="0" step="0.0001" class="inp-sm" /></td>
+              <td><input v-model.number="r.comisionPorc" type="number" min="0" step="0.0001" placeholder="ej. 0.29" class="inp-sm" /></td>
               <td>
                 <button class="btn sm danger icon" @click="form.rangos.splice(i, 1)">
                   <i class="ti ti-trash" style="font-size:0.8rem"></i>

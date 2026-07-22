@@ -62,15 +62,15 @@
       <div class="form-row fc3">
         <div class="field">
           <label>Cargo (código)</label>
-          <input v-model="filtros.codigoOficio" :disabled="cargando" />
+          <input v-model="filtros.codigoOficio" placeholder="ej. 104608" :disabled="cargando" />
         </div>
         <div class="field">
           <label>Comisión mínima</label>
-          <input v-model.number="filtros.comisionMin" type="number" min="0" :disabled="cargando" />
+          <input v-model.number="filtros.comisionMin" type="number" min="0" placeholder="0" :disabled="cargando" />
         </div>
         <div class="field">
           <label>Comisión máxima</label>
-          <input v-model.number="filtros.comisionMax" type="number" min="0" :disabled="cargando" />
+          <input v-model.number="filtros.comisionMax" type="number" min="0" placeholder="ej. 1000000" :disabled="cargando" />
         </div>
       </div>
     </div>
