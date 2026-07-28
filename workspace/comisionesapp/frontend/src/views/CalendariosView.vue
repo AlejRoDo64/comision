@@ -123,11 +123,16 @@
     <!-- Selector de calendario -->
     <div v-if="calendarios.length" class="card" style="margin-bottom:14px; padding:12px 16px">
       <div class="cal-tabs">
-        <button
+        <!-- div con role="button" (no <button> anidado: HTML invalido) -->
+        <div
           v-for="c in calendarios"
           :key="c.idCalendario"
+          role="button"
+          tabindex="0"
           :class="['cal-tab', { active: calActivo?.idCalendario === c.idCalendario }]"
           @click="seleccionarCalendario(c)"
+          @keydown.enter="seleccionarCalendario(c)"
+          @keydown.space.prevent="seleccionarCalendario(c)"
         >
           {{ c.nombre }}
           <button
@@ -135,7 +140,7 @@
             title="Eliminar calendario"
             @click.stop="eliminarCalendario(c)"
           >×</button>
-        </button>
+        </div>
       </div>
     </div>
 
