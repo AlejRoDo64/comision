@@ -1,5 +1,6 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DatatestLoader } from './datatest-loader';
 
 /**
  * Cliente SOLO CONSULTA del API Midasoft (ambiente pruebas).
@@ -8,10 +9,16 @@ import { ConfigService } from '@nestjs/config';
  */
 @Injectable()
 export class MidasoftService {
+  private readonly logger = new Logger(MidasoftService.name);
   private token: string | null = null;
   private tokenExpira = 0;
+  private readonly datosLocales: DatatestLoader;
 
-  constructor(private readonly cfg: ConfigService) {}
+  constructor(private readonly cfg: ConfigService) {
+    this.datosLocales = new DatatestLoader(
+      DatatestLoader.resolverDirectorio(cfg.get<string>('DATATEST_DIR')),
+    );
+  }
 
   private get baseUrl(): string {
     return this.cfg.get<string>(
@@ -90,19 +97,49 @@ export class MidasoftService {
   }
 
   /**
-   * Novedades del personal. Midasoft aún NO expone este endpoint (HU-03):
-   * cuando exista, autenticar y consumir aquí igual que empleados().
-   * Forma esperada de cada fila: { Empleado, Fecha_Inicio, Fecha_Fin, Horas, Tipo }.
+   * Novedades del personal. Midasoft aún NO expone este endpoint (HU-03).
+   * PUENTE TEMPORAL: en la operación real, este reporte llega hoy como
+   * archivo plano (no vía API); mientras no exista el endpoint, se lee el
+   * último NovedadesComercial_*.txt de Datatest/ con el mismo formato.
+   * Cuando Midasoft exponga el endpoint, reemplazar este método por la
+   * llamada autenticada — la forma de cada fila ya coincide:
+   * { Empleado, Fecha_Inicio, Fecha_Fin, Horas, Tipo }.
    */
   async novedades(): Promise<any[]> {
-    return [];
+    if (!this.datosLocales.existe()) return [];
+    const filas = this.datosLocales.novedades();
+    if (filas.length) {
+      this.logger.warn(
+        `Novedades sin endpoint Midasoft — usando ${filas.length} registro(s) de NovedadesComercial_*.txt (Datatest/) como puente temporal.`,
+      );
+    }
+    return filas.map((n) => ({
+      Empleado: n.codigo,
+      Fecha_Inicio: n.fechaInicio,
+      Fecha_Fin: n.fechaFin,
+      Horas: n.horas,
+      Tipo: n.tipo,
+    }));
   }
 
   /**
-   * Marcaciones (horas laboradas por día). Endpoint pendiente en Midasoft:
-   * cuando exista, consumir aquí. Forma esperada: { Empleado, Ccosto, Fecha, Horas }.
+   * Marcaciones (horas laboradas por día). Mismo puente temporal que
+   * novedades(): lee MarcacionesComercial_*.txt de Datatest/ mientras
+   * Midasoft no exponga el endpoint. Forma: { Empleado, Ccosto, Fecha, Horas }.
    */
   async marcaciones(): Promise<any[]> {
-    return [];
+    if (!this.datosLocales.existe()) return [];
+    const filas = this.datosLocales.marcaciones();
+    if (filas.length) {
+      this.logger.warn(
+        `Marcaciones sin endpoint Midasoft — usando ${filas.length} registro(s) de MarcacionesComercial_*.txt (Datatest/) como puente temporal.`,
+      );
+    }
+    return filas.map((m) => ({
+      Empleado: m.codigo,
+      Ccosto: m.ccosto,
+      Fecha: m.fecha,
+      Horas: m.horas,
+    }));
   }
 }

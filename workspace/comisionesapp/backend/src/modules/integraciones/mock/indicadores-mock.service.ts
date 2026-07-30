@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatatestLoader } from './datatest-loader';
+import { DatatestLoader } from '../datatest-loader';
 
 /** Fuente de vendedores para generar las ventas simuladas. */
 interface FuenteEmpleados {

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatatestLoader } from './datatest-loader';
+import { DatatestLoader } from '../datatest-loader';
 
 /** Nombres del catálogo oficial HU-02 por código base (enriquecimiento del mock). */
 const NOMBRES_OFICIO: Record<string, string> = {
